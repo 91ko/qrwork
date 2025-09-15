@@ -39,7 +39,8 @@ export async function GET(request: NextRequest) {
       include: {
         employee: {
           select: {
-            name: true
+            name: true,
+            username: true
           }
         }
       },

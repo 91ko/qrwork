@@ -19,9 +19,8 @@ interface Employee {
   name: string
   email: string
   phone: string
-  employeeId: string
-  department: string
-  position: string
+  username: string
+  customFields: string
   isActive: boolean
   createdAt: string
 }
@@ -35,6 +34,20 @@ export default function EmployeeManagementPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    username: '',
+    password: '',
+    confirmPassword: '',
+    isActive: true
+  })
+  const [customFields, setCustomFields] = useState<Array<{id: string, name: string, type: string, value: string, showInAttendance: boolean}>>([])
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isEditLoading, setIsEditLoading] = useState(false)
+  const [editError, setEditError] = useState('')
 
   const checkAuthStatus = useCallback(async () => {
     try {
@@ -106,11 +119,108 @@ export default function EmployeeManagementPage() {
     }
   }
 
+  const handleEditEmployee = (employee: Employee) => {
+    setEditingEmployee(employee)
+    setEditFormData({
+      name: employee.name,
+      email: employee.email || '',
+      phone: employee.phone || '',
+      username: employee.username,
+      password: '',
+      confirmPassword: '',
+      isActive: employee.isActive
+    })
+    
+    // 커스텀 필드 파싱
+    try {
+      const parsedCustomFields = JSON.parse(employee.customFields || '{}')
+      const fieldsArray = Object.entries(parsedCustomFields).map(([key, value]) => ({
+        id: key,
+        name: key,
+        type: 'text',
+        value: value as string,
+        showInAttendance: true
+      }))
+      setCustomFields(fieldsArray)
+    } catch {
+      setCustomFields([])
+    }
+    
+    setIsEditModalOpen(true)
+    setEditError('')
+  }
+
+  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+    }))
+  }
+
+  const handleEditCustomFieldChange = (fieldId: string, value: string) => {
+    setCustomFields(prev => prev.map(field => 
+      field.id === fieldId ? { ...field, value } : field
+    ))
+  }
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsEditLoading(true)
+    setEditError('')
+
+    // 비밀번호 확인
+    if (editFormData.password && editFormData.password !== editFormData.confirmPassword) {
+      setEditError('비밀번호가 일치하지 않습니다.')
+      setIsEditLoading(false)
+      return
+    }
+
+    try {
+      const customFieldsData: { [key: string]: string } = {}
+      customFields.forEach(field => {
+        if (field.value.trim()) {
+          customFieldsData[field.name] = field.value
+        }
+      })
+
+      const response = await fetch(`/api/admin/employees/${editingEmployee?.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          name: editFormData.name,
+          email: editFormData.email,
+          phone: editFormData.phone,
+          username: editFormData.username,
+          password: editFormData.password || undefined,
+          customFields: customFieldsData,
+          isActive: editFormData.isActive
+        }),
+      })
+
+      if (response.ok) {
+        setIsEditModalOpen(false)
+        loadEmployees()
+      } else {
+        const data = await response.json()
+        setEditError(data.message || '직원 정보 수정에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('직원 수정 에러:', error)
+      setEditError('직원 정보 수정 중 오류가 발생했습니다.')
+    } finally {
+      setIsEditLoading(false)
+    }
+  }
+
   const filteredEmployees = employees.filter(employee =>
     employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.department.toLowerCase().includes(searchTerm.toLowerCase())
+    employee.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (employee.phone && employee.phone.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
   if (isLoading) {
@@ -196,10 +306,10 @@ export default function EmployeeManagementPage() {
                     직원 정보
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    사번
+                    사용자명
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    부서/직급
+                    커스텀 필드
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     상태
@@ -230,11 +340,29 @@ export default function EmployeeManagementPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {employee.employeeId}
+                        {employee.username}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{employee.department}</div>
-                        <div className="text-sm text-gray-500">{employee.position}</div>
+                        {(() => {
+                          try {
+                            const customFields = JSON.parse(employee.customFields || '{}')
+                            const fields = Object.entries(customFields).slice(0, 2)
+                            return fields.length > 0 ? (
+                              <div className="text-sm text-gray-900">
+                                {fields.map(([key, value]) => (
+                                  <div key={key}>{key}: {value as string}</div>
+                                ))}
+                                {Object.keys(customFields).length > 2 && (
+                                  <div className="text-xs text-gray-500">+{Object.keys(customFields).length - 2}개 더</div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="text-sm text-gray-500">없음</div>
+                            )
+                          } catch {
+                            return <div className="text-sm text-gray-500">없음</div>
+                          }
+                        })()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -250,15 +378,17 @@ export default function EmployeeManagementPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
-                          <Link
-                            href={`/company/${companyCode}/admin/employees/${employee.id}/edit`}
+                          <button
+                            onClick={() => handleEditEmployee(employee)}
                             className="text-blue-600 hover:text-blue-900"
+                            title="수정"
                           >
                             <Edit className="h-4 w-4" />
-                          </Link>
+                          </button>
                           <button
                             onClick={() => handleDeleteEmployee(employee.id)}
                             className="text-red-600 hover:text-red-900"
+                            title="삭제"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -315,6 +445,185 @@ export default function EmployeeManagementPage() {
           </div>
         </div>
       </main>
+
+      {/* 직원 수정 모달 */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-gray-900">직원 정보 수정</h2>
+                <button
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XCircle className="h-6 w-6" />
+                </button>
+              </div>
+
+              {editError && (
+                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                  {editError}
+                </div>
+              )}
+
+              <form onSubmit={handleEditSubmit} className="space-y-6">
+                {/* 기본 정보 */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700 mb-2">
+                      이름 *
+                    </label>
+                    <input
+                      type="text"
+                      id="edit-name"
+                      name="name"
+                      required
+                      value={editFormData.name}
+                      onChange={handleEditInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="edit-username" className="block text-sm font-medium text-gray-700 mb-2">
+                      사용자명 *
+                    </label>
+                    <input
+                      type="text"
+                      id="edit-username"
+                      name="username"
+                      required
+                      value={editFormData.username}
+                      onChange={handleEditInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="edit-email" className="block text-sm font-medium text-gray-700 mb-2">
+                      이메일
+                    </label>
+                    <input
+                      type="email"
+                      id="edit-email"
+                      name="email"
+                      value={editFormData.email}
+                      onChange={handleEditInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="edit-phone" className="block text-sm font-medium text-gray-700 mb-2">
+                      전화번호
+                    </label>
+                    <input
+                      type="tel"
+                      id="edit-phone"
+                      name="phone"
+                      value={editFormData.phone}
+                      onChange={handleEditInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                {/* 비밀번호 변경 */}
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">비밀번호 변경 (선택사항)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="edit-password" className="block text-sm font-medium text-gray-700 mb-2">
+                        새 비밀번호
+                      </label>
+                      <input
+                        type="password"
+                        id="edit-password"
+                        name="password"
+                        value={editFormData.password}
+                        onChange={handleEditInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="edit-confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
+                        비밀번호 확인
+                      </label>
+                      <input
+                        type="password"
+                        id="edit-confirm-password"
+                        name="confirmPassword"
+                        value={editFormData.confirmPassword}
+                        onChange={handleEditInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 커스텀 필드 */}
+                {customFields.length > 0 && (
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">커스텀 필드</h3>
+                    <div className="space-y-4">
+                      {customFields.map((field) => (
+                        <div key={field.id}>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            {field.name}
+                          </label>
+                          <input
+                            type="text"
+                            value={field.value}
+                            onChange={(e) => handleEditCustomFieldChange(field.id, e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 활성 상태 */}
+                <div className="border-t pt-6">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="edit-isActive"
+                      name="isActive"
+                      checked={editFormData.isActive}
+                      onChange={handleEditInputChange}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="edit-isActive" className="ml-2 block text-sm text-gray-900">
+                      계정 활성화
+                    </label>
+                  </div>
+                </div>
+
+                {/* 버튼 */}
+                <div className="flex justify-end space-x-3 pt-6 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                  >
+                    취소
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isEditLoading}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50"
+                  >
+                    {isEditLoading ? '수정 중...' : '수정 완료'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
