@@ -61,10 +61,6 @@ export default function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  useEffect(() => {
-    checkAuthStatus()
-  }, [checkAuthStatus])
-
   const checkAuthStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/me', {
@@ -95,6 +91,10 @@ export default function AdminDashboard() {
       router.push(`/company/${companyCode}/admin`)
     }
   }, [companyCode, router])
+
+  useEffect(() => {
+    checkAuthStatus()
+  }, [checkAuthStatus])
 
   const loadDashboardData = async () => {
     try {

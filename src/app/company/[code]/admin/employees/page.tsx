@@ -36,10 +36,6 @@ export default function EmployeeManagementPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  useEffect(() => {
-    checkAuthStatus()
-  }, [checkAuthStatus])
-
   const checkAuthStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/me', {
@@ -63,6 +59,10 @@ export default function EmployeeManagementPage() {
       router.push(`/company/${companyCode}/admin`)
     }
   }, [companyCode, router])
+
+  useEffect(() => {
+    checkAuthStatus()
+  }, [checkAuthStatus])
 
   const loadEmployees = async () => {
     try {

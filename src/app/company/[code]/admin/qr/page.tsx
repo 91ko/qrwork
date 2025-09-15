@@ -37,10 +37,6 @@ export default function QrManagementPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  useEffect(() => {
-    checkAuthStatus()
-  }, [checkAuthStatus])
-
   const checkAuthStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/me', {
@@ -64,6 +60,10 @@ export default function QrManagementPage() {
       router.push(`/company/${companyCode}/admin`)
     }
   }, [companyCode, router])
+
+  useEffect(() => {
+    checkAuthStatus()
+  }, [checkAuthStatus])
 
   const loadQrCodes = async () => {
     try {

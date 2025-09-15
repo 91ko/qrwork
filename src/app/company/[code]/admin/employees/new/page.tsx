@@ -27,10 +27,6 @@ export default function NewEmployeePage() {
   const [error, setError] = useState('')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  useEffect(() => {
-    checkAuthStatus()
-  }, [checkAuthStatus])
-
   const checkAuthStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/me', {
@@ -53,6 +49,10 @@ export default function NewEmployeePage() {
       router.push(`/company/${companyCode}/admin`)
     }
   }, [companyCode, router])
+
+  useEffect(() => {
+    checkAuthStatus()
+  }, [checkAuthStatus])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({

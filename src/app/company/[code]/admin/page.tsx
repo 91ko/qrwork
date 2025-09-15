@@ -18,10 +18,6 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('')
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
-  useEffect(() => {
-    checkAuthStatus()
-  }, [checkAuthStatus])
-
   const checkAuthStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/me', {
@@ -47,6 +43,10 @@ export default function AdminLoginPage() {
       setIsCheckingAuth(false)
     }
   }, [companyCode, router])
+
+  useEffect(() => {
+    checkAuthStatus()
+  }, [checkAuthStatus])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -31,10 +31,6 @@ export default function NewQrCodePage() {
     qrImageUrl: string
   } | null>(null)
 
-  useEffect(() => {
-    checkAuthStatus()
-  }, [checkAuthStatus])
-
   const checkAuthStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/me', {
@@ -57,6 +53,10 @@ export default function NewQrCodePage() {
       router.push(`/company/${companyCode}/admin`)
     }
   }, [companyCode, router])
+
+  useEffect(() => {
+    checkAuthStatus()
+  }, [checkAuthStatus])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
