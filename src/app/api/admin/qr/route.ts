@@ -8,7 +8,7 @@ const prisma = new PrismaClient()
 // JWT 토큰에서 관리자 정보 추출
 async function getAdminFromToken(request: NextRequest) {
   try {
-    const token = request.cookies.get('auth-token')?.value
+    const token = request.cookies.get('token')?.value
     
     if (!token) {
       return null
