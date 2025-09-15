@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/prisma'
 
 // JWT 토큰에서 관리자 정보 추출
 async function getAdminFromToken(request: NextRequest) {

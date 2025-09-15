@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken'
 import QRCode from 'qrcode'
-
-// Prisma 클라이언트를 전역으로 관리
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
-
-const prisma = globalForPrisma.prisma ?? new PrismaClient()
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+import prisma from '@/lib/prisma'
 
 // JWT 토큰에서 관리자 정보 추출
 async function getAdminFromToken(request: NextRequest) {
@@ -43,6 +34,13 @@ export async function GET(request: NextRequest) {
     const qrCodes = await prisma.qrCode.findMany({
       where: {
         companyId: admin.companyId
+      },
+      include: {
+        _count: {
+          select: {
+            attendances: true
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc'
@@ -96,7 +94,10 @@ export async function POST(request: NextRequest) {
     const qrData = {
       companyCode: admin.companyCode,
       qrCodeId: 'temp', // 임시 ID, 생성 후 업데이트
-      type: type
+      type: type,
+      name: name,
+      location: location || null,
+      scanUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://qrwork.vercel.app'}/company/${admin.companyCode}/scan`
     }
 
     // QR 코드 생성
@@ -157,8 +158,7 @@ export async function POST(request: NextRequest) {
     console.error('QR 코드 생성 에러:', error)
     console.error('에러 상세:', {
       message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-      body: body
+      stack: error instanceof Error ? error.stack : undefined
     })
     return NextResponse.json(
       { 

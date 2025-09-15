@@ -9,7 +9,10 @@ import {
   Clock,
   ArrowLeft,
   Eye,
-  EyeOff
+  EyeOff,
+  Camera,
+  CheckCircle,
+  XCircle
 } from 'lucide-react'
 
 export default function QrScanPage() {
@@ -22,11 +25,14 @@ export default function QrScanPage() {
     password: ''
   })
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberLogin, setRememberLogin] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [employee, setEmployee] = useState<any>(null)
   const [lastAttendance, setLastAttendance] = useState<any>(null)
+  const [showQrScanner, setShowQrScanner] = useState(false)
+  const [qrScanResult, setQrScanResult] = useState<string>('')
 
   const checkAuthStatus = useCallback(async () => {
     try {
@@ -52,8 +58,23 @@ export default function QrScanPage() {
   }, [companyCode, router])
 
   useEffect(() => {
+    // 저장된 로그인 정보 불러오기
+    const savedLogin = localStorage.getItem(`qrwork_login_${companyCode}`)
+    if (savedLogin) {
+      try {
+        const loginData = JSON.parse(savedLogin)
+        setFormData({
+          username: loginData.username || '',
+          password: loginData.password || ''
+        })
+        setRememberLogin(true)
+      } catch (error) {
+        console.error('저장된 로그인 정보 불러오기 실패:', error)
+      }
+    }
+    
     checkAuthStatus()
-  }, [checkAuthStatus])
+  }, [checkAuthStatus, companyCode])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -85,6 +106,16 @@ export default function QrScanPage() {
         setEmployee(data.employee)
         setLastAttendance(data.lastAttendance)
         setIsAuthenticated(true)
+        
+        // 로그인 정보 저장
+        if (rememberLogin) {
+          localStorage.setItem(`qrwork_login_${companyCode}`, JSON.stringify({
+            username: formData.username,
+            password: formData.password
+          }))
+        } else {
+          localStorage.removeItem(`qrwork_login_${companyCode}`)
+        }
       } else {
         const data = await response.json()
         setError(data.message || '로그인에 실패했습니다.')
@@ -126,6 +157,39 @@ export default function QrScanPage() {
     } catch (error) {
       console.error('출퇴근 기록 에러:', error)
       setError('출퇴근 기록 중 오류가 발생했습니다.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleQrScan = async (qrData: string) => {
+    setIsLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/app/attendance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          qrData: qrData,
+          username: employee.username
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setLastAttendance(data.attendance)
+        alert(`${data.attendance.type === 'CHECK_IN' ? '출근' : '퇴근'}이 기록되었습니다!`)
+      } else {
+        const data = await response.json()
+        setError(data.message || 'QR 코드 스캔에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('QR 스캔 에러:', error)
+      setError('QR 코드 스캔 중 오류가 발생했습니다.')
     } finally {
       setIsLoading(false)
     }
@@ -203,6 +267,21 @@ export default function QrScanPage() {
                     )}
                   </button>
                 </div>
+              </div>
+
+              {/* Remember Login */}
+              <div className="flex items-center">
+                <input
+                  id="rememberLogin"
+                  name="rememberLogin"
+                  type="checkbox"
+                  checked={rememberLogin}
+                  onChange={(e) => setRememberLogin(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="rememberLogin" className="ml-2 block text-sm text-gray-700">
+                  로그인 정보 저장 (이 기기에서 자동 로그인)
+                </label>
               </div>
 
               {/* Error Message */}
@@ -299,6 +378,35 @@ export default function QrScanPage() {
           </div>
         )}
 
+        {/* QR Code Scanner */}
+        <div className="bg-white rounded-lg shadow-md p-8 mb-8">
+          <div className="text-center">
+            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Camera className="h-8 w-8 text-blue-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">QR 코드 스캔</h3>
+            <p className="text-gray-600 mb-6">관리자가 생성한 QR 코드를 스캔하여 출퇴근하세요</p>
+            
+            <div className="bg-gray-50 p-4 rounded-lg border-2 border-dashed border-gray-300">
+              <p className="text-sm text-gray-500 mb-2">QR 코드 데이터를 입력하세요:</p>
+              <textarea
+                value={qrScanResult}
+                onChange={(e) => setQrScanResult(e.target.value)}
+                placeholder="QR 코드를 스캔하거나 데이터를 입력하세요..."
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={3}
+              />
+              <button
+                onClick={() => handleQrScan(qrScanResult)}
+                disabled={!qrScanResult.trim() || isLoading}
+                className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium disabled:bg-gray-400"
+              >
+                {isLoading ? '처리 중...' : 'QR 코드 스캔'}
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Attendance Buttons */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Check In */}
@@ -345,9 +453,10 @@ export default function QrScanPage() {
         <div className="mt-8 bg-blue-50 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-blue-900 mb-2">사용 방법</h3>
           <ul className="text-sm text-blue-800 space-y-1">
-            <li>• 출근 시 "출근하기" 버튼을 클릭하세요</li>
-            <li>• 퇴근 시 "퇴근하기" 버튼을 클릭하세요</li>
-            <li>• 출근 후에는 퇴근만, 퇴근 후에는 출근만 가능합니다</li>
+            <li>• <strong>QR 코드 스캔:</strong> 관리자가 생성한 QR 코드를 스캔하여 자동 출퇴근</li>
+            <li>• <strong>수동 출퇴근:</strong> "출근하기" 또는 "퇴근하기" 버튼 클릭</li>
+            <li>• <strong>QR 코드 우선:</strong> QR 코드 스캔이 위치 정보와 함께 더 정확합니다</li>
+            <li>• <strong>회사별 격리:</strong> 각 회사의 QR 코드는 해당 회사에서만 사용 가능</li>
             <li>• 출퇴근 기록은 관리자 대시보드에서 확인할 수 있습니다</li>
           </ul>
         </div>
