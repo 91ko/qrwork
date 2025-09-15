@@ -253,6 +253,14 @@ export default function AdminDashboard() {
                 </Link>
                 
                 <Link
+                  href={`/company/${companyCode}/admin/settings`}
+                  className="flex items-center p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+                >
+                  <Settings className="h-5 w-5 text-purple-600 mr-3" />
+                  <span className="text-purple-900">설정</span>
+                </Link>
+                
+                <Link
                   href={`/company/${companyCode}/admin/attendance`}
                   className="flex items-center p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
                 >
