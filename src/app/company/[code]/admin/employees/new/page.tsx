@@ -30,7 +30,7 @@ export default function NewEmployeePage() {
     id: string
     name: string
     value: string
-    type: 'text' | 'email' | 'tel' | 'select' | 'textarea'
+    type: 'text' | 'email' | 'tel' | 'select' | 'textarea' | 'ssn'
     options?: string[]
   }>>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -39,7 +39,7 @@ export default function NewEmployeePage() {
   const [showAddField, setShowAddField] = useState(false)
   const [newField, setNewField] = useState({
     name: '',
-    type: 'text' as 'text' | 'email' | 'tel' | 'select' | 'textarea',
+    type: 'text' as 'text' | 'email' | 'tel' | 'select' | 'textarea' | 'ssn',
     options: [] as string[]
   })
 
@@ -370,6 +370,7 @@ export default function NewEmployeePage() {
                         <option value="text">텍스트</option>
                         <option value="email">이메일</option>
                         <option value="tel">전화번호</option>
+                        <option value="ssn">주민번호</option>
                         <option value="select">선택박스</option>
                         <option value="textarea">긴 텍스트</option>
                       </select>
@@ -461,6 +462,22 @@ export default function NewEmployeePage() {
                         </option>
                       ))}
                     </select>
+                  ) : field.type === 'ssn' ? (
+                    <input
+                      type="text"
+                      value={field.value}
+                      onChange={(e) => {
+                        // 주민번호 포맷팅 (123456-1234567)
+                        let value = e.target.value.replace(/[^0-9]/g, '')
+                        if (value.length > 6) {
+                          value = value.slice(0, 6) + '-' + value.slice(6, 13)
+                        }
+                        handleCustomFieldChange(field.id, value)
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="123456-1234567"
+                      maxLength={14}
+                    />
                   ) : (
                     <input
                       type={field.type}
