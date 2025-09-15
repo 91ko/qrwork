@@ -20,6 +20,19 @@ interface LocationData {
   longitude: number
 }
 
+interface GeneratedQrCode {
+  id: string
+  name: string
+  type: string
+  location: string
+  latitude: number
+  longitude: number
+  radius: number
+  isActive: boolean
+  qrData: string
+  qrImageUrl: string
+}
+
 export default function NewQrCodePage() {
   const params = useParams()
   const router = useRouter()
@@ -35,17 +48,7 @@ export default function NewQrCodePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [generatedQr, setGeneratedQr] = useState<{
-    id: string
-    name: string
-    type: string
-    location: string
-    latitude: number
-    longitude: number
-    radius: number
-    qrData: string
-    qrImageUrl: string
-  } | null>(null)
+  const [generatedQr, setGeneratedQr] = useState<GeneratedQrCode | null>(null)
   const [isGeocoding, setIsGeocoding] = useState(false)
 
   const checkAuthStatus = useCallback(async () => {
