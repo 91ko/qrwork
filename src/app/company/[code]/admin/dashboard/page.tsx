@@ -157,6 +157,9 @@ export default function AdminDashboard() {
               <QrCode className="h-8 w-8 text-blue-600" />
               <span className="ml-2 text-2xl font-bold text-gray-900">QR워크</span>
               <span className="ml-4 text-lg text-gray-600">- 관리자 대시보드</span>
+              {company && (
+                <span className="ml-4 text-lg font-semibold text-blue-600">({company.name})</span>
+              )}
             </div>
             <div className="flex items-center space-x-4">
               {admin && (
@@ -266,14 +269,6 @@ export default function AdminDashboard() {
                 >
                   <Clock className="h-5 w-5 text-purple-600 mr-3" />
                   <span className="text-purple-900">출퇴근 관리</span>
-                </Link>
-                
-                <Link
-                  href={`/company/${companyCode}/admin/settings`}
-                  className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <Settings className="h-5 w-5 text-gray-600 mr-3" />
-                  <span className="text-gray-900">설정</span>
                 </Link>
               </div>
             </div>

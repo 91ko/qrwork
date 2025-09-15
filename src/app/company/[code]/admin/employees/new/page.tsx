@@ -32,6 +32,7 @@ export default function NewEmployeePage() {
     value: string
     type: 'text' | 'email' | 'tel' | 'select' | 'textarea' | 'ssn'
     options?: string[]
+    showInAttendance: boolean
   }>>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')

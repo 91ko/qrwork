@@ -27,6 +27,7 @@ model Company {
   employees     Employee[]
   qrCodes       QrCode[]
   attendances   Attendance[]
+  settings      CompanySettings?
 
   @@map("companies")
 }
@@ -72,11 +73,30 @@ model Employee {
   @@map("employees")
 }
 
+// 회사 설정 모델
+model CompanySettings {
+  id                    String   @id @default(cuid())
+  customFieldSettings   String?  // 커스텀 필드 표시 설정 (JSON)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // 관계
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId])
+  @@map("company_settings")
+}
+
 // QR 코드 모델
 model QrCode {
   id          String   @id @default(cuid())
   name        String   // QR 코드 이름
-  location    String?  // 위치 정보
+  type        String   // "CHECK_IN" 또는 "CHECK_OUT"
+  location    String?  // 위치 정보 (주소)
+  latitude    Float?   // 위도
+  longitude   Float?   // 경도
+  radius      Int?     // 허용 반경 (미터)
   qrData      String   // QR 코드 데이터 (JSON 문자열)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
