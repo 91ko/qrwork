@@ -9,12 +9,20 @@ async function getAdminFromToken(request: NextRequest) {
     const token = request.cookies.get('token')?.value
     
     if (!token) {
+      console.log('토큰이 없습니다')
       return null
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET 환경 변수가 설정되지 않았습니다')
+      return null
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET) as any
+    console.log('JWT 토큰 검증 성공:', { companyId: decoded.companyId, companyCode: decoded.companyCode })
     return decoded
   } catch (error) {
+    console.error('JWT 토큰 검증 실패:', error)
     return null
   }
 }
