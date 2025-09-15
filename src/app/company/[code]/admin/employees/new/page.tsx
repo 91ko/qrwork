@@ -93,7 +93,8 @@ export default function NewEmployeePage() {
       name: newField.name,
       value: '',
       type: newField.type,
-      options: newField.type === 'select' ? newField.options : undefined
+      options: newField.type === 'select' ? newField.options : undefined,
+      showInAttendance: true
     }])
 
     setNewField({
@@ -433,13 +434,30 @@ export default function NewEmployeePage() {
                     <label className="block text-sm font-medium text-gray-700">
                       {field.name}
                     </label>
-                    <button
-                      type="button"
-                      onClick={() => removeCustomField(field.id)}
-                      className="text-red-600 hover:text-red-500"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      <label className="flex items-center text-sm text-gray-600">
+                        <input
+                          type="checkbox"
+                          checked={field.showInAttendance}
+                          onChange={(e) => {
+                            setCustomFields(prev => prev.map(f => 
+                              f.id === field.id 
+                                ? { ...f, showInAttendance: e.target.checked }
+                                : f
+                            ))
+                          }}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-1"
+                        />
+                        출퇴근 기록에 표시
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => removeCustomField(field.id)}
+                        className="text-red-600 hover:text-red-500"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                   
                   {field.type === 'textarea' ? (
