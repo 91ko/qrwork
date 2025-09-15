@@ -92,7 +92,7 @@ model CompanySettings {
 model QrCode {
   id          String   @id @default(cuid())
   name        String   // QR 코드 이름
-  type        String   // "CHECK_IN" 또는 "CHECK_OUT"
+  type        String   @default("CHECK_IN") // "CHECK_IN" 또는 "CHECK_OUT"
   location    String?  // 위치 정보 (주소)
   latitude    Float?   // 위도
   longitude   Float?   // 경도
