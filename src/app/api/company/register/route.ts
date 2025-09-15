@@ -145,10 +145,18 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('회사 등록 에러:', error)
     return NextResponse.json(
-      { message: '서버 오류가 발생했습니다.' },
+      { 
+        message: '서버 오류가 발생했습니다.',
+        error: error instanceof Error ? error.message : '알 수 없는 오류',
+        stack: error instanceof Error ? error.stack : undefined
+      },
       { status: 500 }
     )
   } finally {
-    await prisma.$disconnect()
+    try {
+      await prisma.$disconnect()
+    } catch (disconnectError) {
+      console.error('Prisma 연결 해제 에러:', disconnectError)
+    }
   }
 }
