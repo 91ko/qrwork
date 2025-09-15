@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -94,15 +95,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 비밀번호 해시화
+    const hashedPassword = await bcrypt.hash(password, 12)
+
     // 직원 생성
     const employee = await prisma.employee.create({
       data: {
         name,
         email: email || null,
         phone: phone || null,
-        employeeId: employeeId || null,
-        department: department || null,
-        position: position || null,
+        username,
+        password: hashedPassword,
+        customFields: customFields ? JSON.stringify(customFields) : '{}',
         isActive: true,
         companyId: admin.companyId
       }
