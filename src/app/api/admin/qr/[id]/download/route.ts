@@ -64,7 +64,7 @@ export async function GET(
     })
 
     // PNG 이미지로 응답
-    return new NextResponse(qrImageBuffer, {
+    return new NextResponse(new Uint8Array(qrImageBuffer), {
       headers: {
         'Content-Type': 'image/png',
         'Content-Disposition': `attachment; filename="QR_${qrCode.name}_${new Date().toISOString().split('T')[0]}.png"`
