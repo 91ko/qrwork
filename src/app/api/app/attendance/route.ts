@@ -7,12 +7,12 @@ const prisma = new PrismaClient()
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { qrData, employeeId } = body
+    const { qrData, username } = body
 
     // 유효성 검사
-    if (!qrData || !employeeId) {
+    if (!qrData || !username) {
       return NextResponse.json(
-        { message: 'QR 데이터와 직원 ID가 필요합니다.' },
+        { message: 'QR 데이터와 사용자 ID가 필요합니다.' },
         { status: 400 }
       )
     }
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     // 직원 확인
     const employee = await prisma.employee.findFirst({
       where: {
-        id: employeeId,
+        username: username,
         companyId: company.id,
         isActive: true
       }
@@ -141,13 +141,13 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const employeeId = searchParams.get('employeeId')
+    const username = searchParams.get('username')
     const companyCode = searchParams.get('companyCode')
     const date = searchParams.get('date')
 
-    if (!employeeId || !companyCode) {
+    if (!username || !companyCode) {
       return NextResponse.json(
-        { message: '직원 ID와 회사 코드가 필요합니다.' },
+        { message: '사용자 ID와 회사 코드가 필요합니다.' },
         { status: 400 }
       )
     }
@@ -167,7 +167,7 @@ export async function GET(request: NextRequest) {
     // 직원 확인
     const employee = await prisma.employee.findFirst({
       where: {
-        id: employeeId,
+        username: username,
         companyId: company.id
       }
     })
@@ -219,7 +219,7 @@ export async function GET(request: NextRequest) {
       attendances: attendances,
       employee: {
         name: employee.name,
-        employeeId: employee.employeeId
+        username: employee.username
       },
       date: startDate.toISOString().split('T')[0]
     })
