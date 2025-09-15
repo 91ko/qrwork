@@ -23,7 +23,10 @@ async function getEmployeeFromToken(request: NextRequest) {
 // 출퇴근 기록
 export async function POST(request: NextRequest) {
   try {
+    console.log('직원 출퇴근 기록 API 시작')
+    
     const employee = await getEmployeeFromToken(request)
+    console.log('직원 인증 결과:', employee ? '성공' : '실패')
     
     if (!employee) {
       return NextResponse.json(
@@ -33,6 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    console.log('요청 데이터:', body)
     const { type, companyCode } = body
 
     if (!type || !companyCode) {
@@ -115,15 +119,17 @@ export async function POST(request: NextRequest) {
     }
 
     // 출퇴근 기록 생성
+    console.log('출퇴근 기록 생성 시작:', { type, employeeId: employee.employeeId, companyId: company.id })
     const attendance = await prisma.attendance.create({
       data: {
         type,
         timestamp: new Date(),
-        employeeId: employee.id,
+        employeeId: employee.employeeId,
         companyId: company.id,
         qrCodeId: null // QR 스캔이 아닌 직접 기록
       }
     })
+    console.log('출퇴근 기록 생성 완료:', attendance.id)
 
     return NextResponse.json({
       message: `${type === 'CHECK_IN' ? '출근' : '퇴근'}이 성공적으로 기록되었습니다.`,
