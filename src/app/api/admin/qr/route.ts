@@ -63,7 +63,10 @@ export async function GET(request: NextRequest) {
 // QR 코드 생성
 export async function POST(request: NextRequest) {
   try {
+    console.log('QR 코드 생성 API 시작')
+    
     const admin = await getAdminFromToken(request)
+    console.log('관리자 인증 결과:', admin ? '성공' : '실패')
     
     if (!admin) {
       return NextResponse.json(
@@ -73,6 +76,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    console.log('요청 데이터:', body)
     const { name, type, location, latitude, longitude, radius, isActive } = body
 
     // 유효성 검사
@@ -101,6 +105,7 @@ export async function POST(request: NextRequest) {
     }
 
     // QR 코드 생성
+    console.log('데이터베이스에 QR 코드 생성 시작')
     const qrCode = await prisma.qrCode.create({
       data: {
         name,
@@ -114,6 +119,7 @@ export async function POST(request: NextRequest) {
         companyId: admin.companyId
       }
     })
+    console.log('QR 코드 생성 완료:', qrCode.id)
 
     // QR 코드 데이터 업데이트 (실제 ID 포함)
     const updatedQrData = {
@@ -130,6 +136,7 @@ export async function POST(request: NextRequest) {
     })
 
     // QR 코드 이미지 생성
+    console.log('QR 코드 이미지 생성 시작')
     const qrImageDataURL = await QRCode.toDataURL(JSON.stringify(updatedQrData), {
       width: 300,
       margin: 2,
@@ -138,6 +145,7 @@ export async function POST(request: NextRequest) {
         light: '#FFFFFF'
       }
     })
+    console.log('QR 코드 이미지 생성 완료')
 
     return NextResponse.json({
       message: 'QR 코드가 성공적으로 생성되었습니다.',
