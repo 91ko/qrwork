@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { 
@@ -38,9 +38,9 @@ export default function EmployeeManagementPage() {
 
   useEffect(() => {
     checkAuthStatus()
-  }, [companyCode, router])
+  }, [checkAuthStatus])
 
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/me', {
         method: 'GET',
@@ -62,7 +62,7 @@ export default function EmployeeManagementPage() {
       console.error('인증 확인 에러:', error)
       router.push(`/company/${companyCode}/admin`)
     }
-  }
+  }, [companyCode, router])
 
   const loadEmployees = async () => {
     try {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { QrCode, Eye, EyeOff, LogIn } from 'lucide-react'
 
@@ -20,9 +20,9 @@ export default function AdminLoginPage() {
 
   useEffect(() => {
     checkAuthStatus()
-  }, [companyCode, router])
+  }, [checkAuthStatus])
 
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/me', {
         method: 'GET',
@@ -46,7 +46,7 @@ export default function AdminLoginPage() {
       console.error('인증 확인 에러:', error)
       setIsCheckingAuth(false)
     }
-  }
+  }, [companyCode, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
