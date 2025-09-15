@@ -22,9 +22,9 @@ export default function NewEmployeePage() {
     name: '',
     email: '',
     phone: '',
-    employeeId: '',
-    department: '',
-    position: ''
+    username: '',
+    password: '',
+    confirmPassword: ''
   })
   const [customFields, setCustomFields] = useState<Array<{
     id: string
@@ -132,6 +132,20 @@ export default function NewEmployeePage() {
     e.preventDefault()
     setIsLoading(true)
     setError('')
+
+    // 비밀번호 확인 검증
+    if (formData.password !== formData.confirmPassword) {
+      setError('비밀번호가 일치하지 않습니다.')
+      setIsLoading(false)
+      return
+    }
+
+    // 비밀번호 길이 검증
+    if (formData.password.length < 6) {
+      setError('비밀번호는 최소 6자 이상이어야 합니다.')
+      setIsLoading(false)
+      return
+    }
 
     try {
       const response = await fetch('/api/admin/employees', {
@@ -262,68 +276,51 @@ export default function NewEmployeePage() {
               </div>
 
               <div>
-                <label htmlFor="employeeId" className="block text-sm font-medium text-gray-700 mb-2">
-                  사번 *
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+                  사용자 ID *
                 </label>
                 <input
                   type="text"
-                  id="employeeId"
-                  name="employeeId"
+                  id="username"
+                  name="username"
                   required
-                  value={formData.employeeId}
+                  value={formData.username}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="EMP001"
+                  placeholder="employee001"
                 />
               </div>
 
               <div>
-                <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-2">
-                  부서 *
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                  비밀번호 *
                 </label>
-                <select
-                  id="department"
-                  name="department"
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
                   required
-                  value={formData.department}
+                  value={formData.password}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">부서를 선택하세요</option>
-                  <option value="개발팀">개발팀</option>
-                  <option value="디자인팀">디자인팀</option>
-                  <option value="마케팅팀">마케팅팀</option>
-                  <option value="영업팀">영업팀</option>
-                  <option value="인사팀">인사팀</option>
-                  <option value="재무팀">재무팀</option>
-                  <option value="기획팀">기획팀</option>
-                  <option value="운영팀">운영팀</option>
-                </select>
+                  placeholder="비밀번호를 입력하세요"
+                />
               </div>
 
               <div>
-                <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-2">
-                  직급 *
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                  비밀번호 확인 *
                 </label>
-                <select
-                  id="position"
-                  name="position"
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
                   required
-                  value={formData.position}
+                  value={formData.confirmPassword}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">직급을 선택하세요</option>
-                  <option value="사원">사원</option>
-                  <option value="대리">대리</option>
-                  <option value="과장">과장</option>
-                  <option value="차장">차장</option>
-                  <option value="부장">부장</option>
-                  <option value="이사">이사</option>
-                  <option value="상무">상무</option>
-                  <option value="전무">전무</option>
-                  <option value="사장">사장</option>
-                </select>
+                  placeholder="비밀번호를 다시 입력하세요"
+                />
               </div>
             </div>
 
