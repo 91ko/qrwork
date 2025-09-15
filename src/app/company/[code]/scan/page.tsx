@@ -234,7 +234,7 @@ export default function QrScanPage() {
                   required
                   value={formData.username}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                   placeholder="사용자 ID를 입력하세요"
                 />
               </div>
@@ -252,7 +252,7 @@ export default function QrScanPage() {
                     required
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                     placeholder="비밀번호를 입력하세요"
                   />
                   <button
@@ -393,7 +393,7 @@ export default function QrScanPage() {
                 value={qrScanResult}
                 onChange={(e) => setQrScanResult(e.target.value)}
                 placeholder="QR 코드를 스캔하거나 데이터를 입력하세요..."
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                 rows={3}
               />
               <button
