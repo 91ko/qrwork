@@ -3,7 +3,14 @@ import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken'
 import QRCode from 'qrcode'
 
-const prisma = new PrismaClient()
+// Prisma 클라이언트를 전역으로 관리
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
+}
+
+const prisma = globalForPrisma.prisma ?? new PrismaClient()
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
 // JWT 토큰에서 관리자 정보 추출
 async function getAdminFromToken(request: NextRequest) {
@@ -52,8 +59,6 @@ export async function GET(request: NextRequest) {
       { message: '서버 오류가 발생했습니다.' },
       { status: 500 }
     )
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -150,11 +155,17 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('QR 코드 생성 에러:', error)
+    console.error('에러 상세:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      body: body
+    })
     return NextResponse.json(
-      { message: '서버 오류가 발생했습니다.' },
+      { 
+        message: '서버 오류가 발생했습니다.',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
-  } finally {
-    await prisma.$disconnect()
   }
 }

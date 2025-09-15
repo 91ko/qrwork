@@ -371,18 +371,32 @@ export default function NewQrCodePage() {
                   <h3 className="text-lg font-semibold text-gray-900">QR 활성화 설정</h3>
                 </div>
 
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="isActive"
-                    name="isActive"
-                    checked={formData.isActive}
-                    onChange={handleCheckboxChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
-                    QR 코드 활성화 (체크 해제 시 QR 스캔 불가)
-                  </label>
+                <div className="bg-gray-50 p-4 rounded-lg border">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className={`w-4 h-4 rounded-full mr-3 ${
+                        formData.isActive ? 'bg-green-500' : 'bg-red-500'
+                      }`}></div>
+                      <div>
+                        <label htmlFor="isActive" className="block text-sm font-medium text-gray-900">
+                          QR 코드 활성화 상태
+                        </label>
+                        <p className="text-sm text-gray-500">
+                          {formData.isActive ? '🟢 활성화 중 - 직원들이 QR 코드를 스캔할 수 있습니다' : '🔴 비활성화 중 - QR 코드 스캔이 불가능합니다'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="isActive"
+                        name="isActive"
+                        checked={formData.isActive}
+                        onChange={handleCheckboxChange}
+                        className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                    </div>
+                  </div>
                 </div>
                 <p className="text-sm text-gray-500">
                   QR 코드를 생성한 후 언제든지 활성화/비활성화를 변경할 수 있습니다.
@@ -446,6 +460,26 @@ export default function NewQrCodePage() {
                   <div>
                     <p className="text-sm font-medium text-gray-600">허용 반경</p>
                     <p className="text-lg font-semibold text-gray-900">{generatedQr.radius}m</p>
+                  </div>
+                </div>
+
+                {/* 활성화 상태 표시 */}
+                <div className="mb-6 p-4 rounded-lg border-2 border-dashed">
+                  <div className="flex items-center justify-center">
+                    <div className={`w-4 h-4 rounded-full mr-3 ${
+                      generatedQr.isActive ? 'bg-green-500' : 'bg-red-500'
+                    }`}></div>
+                    <div className="text-center">
+                      <p className="text-lg font-semibold text-gray-900">
+                        {generatedQr.isActive ? '🟢 활성화 중' : '🔴 비활성화 중'}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {generatedQr.isActive 
+                          ? '직원들이 이 QR 코드를 스캔하여 출퇴근할 수 있습니다' 
+                          : '현재 QR 코드 스캔이 비활성화되어 있습니다'
+                        }
+                      </p>
+                    </div>
                   </div>
                 </div>
 

@@ -18,6 +18,7 @@ import {
 interface QrCodeItem {
   id: string
   name: string
+  type: string
   location: string
   qrData: string
   isActive: boolean
@@ -243,15 +244,29 @@ export default function QrManagementPage() {
                     <div className="ml-3">
                       <h3 className="text-lg font-semibold text-gray-900">{qr.name}</h3>
                       <p className="text-sm text-gray-500">{qr.location}</p>
+                      <div className="flex items-center mt-1">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          qr.type === 'CHECK_IN' 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : 'bg-orange-100 text-orange-800'
+                        }`}>
+                          {qr.type === 'CHECK_IN' ? '📅 출근용' : '🏠 퇴근용'}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    qr.isActive 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {qr.isActive ? '활성' : '비활성'}
-                  </span>
+                  <div className="flex items-center">
+                    <div className={`w-3 h-3 rounded-full mr-2 ${
+                      qr.isActive ? 'bg-green-500' : 'bg-red-500'
+                    }`}></div>
+                    <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                      qr.isActive 
+                        ? 'bg-green-100 text-green-800 border border-green-200' 
+                        : 'bg-red-100 text-red-800 border border-red-200'
+                    }`}>
+                      {qr.isActive ? '🟢 활성화 중' : '🔴 비활성화 중'}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="mb-4">
