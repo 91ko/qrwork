@@ -80,25 +80,40 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // QR 코드 데이터 생성 (스캔 시 사용할 데이터)
+    const qrData = {
+      companyCode: admin.companyCode,
+      qrCodeId: 'temp', // 임시 ID, 생성 후 업데이트
+      type: 'attendance'
+    }
+
     // QR 코드 생성
     const qrCode = await prisma.qrCode.create({
       data: {
         name,
         location: location || null,
+        qrData: JSON.stringify(qrData),
         isActive: true,
         companyId: admin.companyId
       }
     })
 
-    // QR 코드 데이터 생성 (스캔 시 사용할 데이터)
-    const qrData = {
-      companyCode: admin.companyCode,
-      qrCodeId: qrCode.id,
-      type: 'attendance'
+    // QR 코드 데이터 업데이트 (실제 ID 포함)
+    const updatedQrData = {
+      ...qrData,
+      qrCodeId: qrCode.id
     }
 
+    // QR 코드 데이터 업데이트
+    await prisma.qrCode.update({
+      where: { id: qrCode.id },
+      data: {
+        qrData: JSON.stringify(updatedQrData)
+      }
+    })
+
     // QR 코드 이미지 생성
-    const qrImageDataURL = await QRCode.toDataURL(JSON.stringify(qrData), {
+    const qrImageDataURL = await QRCode.toDataURL(JSON.stringify(updatedQrData), {
       width: 300,
       margin: 2,
       color: {
@@ -109,9 +124,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: 'QR 코드가 성공적으로 생성되었습니다.',
-      qrCode: qrCode,
-      qrImageDataURL: qrImageDataURL,
-      qrData: qrData
+      qrCode: {
+        id: qrCode.id,
+        name: qrCode.name,
+        location: qrCode.location,
+        qrData: JSON.stringify(updatedQrData),
+        qrImageUrl: qrImageDataURL
+      }
     })
 
   } catch (error) {
