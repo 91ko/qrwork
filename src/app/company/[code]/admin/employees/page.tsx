@@ -11,7 +11,8 @@ import {
   Trash2, 
   Search,
   ArrowLeft,
-  LogOut
+  LogOut,
+  XCircle
 } from 'lucide-react'
 
 interface Employee {
