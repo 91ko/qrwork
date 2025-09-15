@@ -3,9 +3,9 @@ import { QrCode, Users, Clock, Shield, Phone } from 'lucide-react'
 import Link from 'next/link'
 
 interface CompanyPageProps {
-  params: {
+  params: Promise<{
     code: string
-  }
+  }>
 }
 
 // 회사 정보를 가져오는 함수 (실제로는 API에서 가져올 예정)
@@ -28,7 +28,8 @@ async function getCompany(code: string) {
 }
 
 export default async function CompanyPage({ params }: CompanyPageProps) {
-  const company = await getCompany(params.code)
+  const { code } = await params
+  const company = await getCompany(code)
   
   if (!company) {
     notFound()
@@ -49,7 +50,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
             </div>
             <div className="flex space-x-4">
               <Link
-                href={`/company/${params.code}/admin`}
+                href={`/company/${code}/admin`}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
               >
                 관리자 로그인
@@ -111,7 +112,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                 QR 코드를 스캔하여 출퇴근을 기록하세요
               </p>
               <Link
-                href={`/company/${params.code}/scan`}
+                href={`/company/${code}/scan`}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium inline-block"
               >
                 QR 스캔하기
@@ -130,7 +131,7 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
                 직원 관리, QR 코드 생성, 출퇴근 현황을 확인하세요
               </p>
               <Link
-                href={`/company/${params.code}/admin`}
+                href={`/company/${code}/admin`}
                 className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium inline-block"
               >
                 관리자 로그인
@@ -171,7 +172,8 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
 
 // 동적 라우팅을 위한 메타데이터 생성
 export async function generateMetadata({ params }: CompanyPageProps) {
-  const company = await getCompany(params.code)
+  const { code } = await params
+  const company = await getCompany(code)
   
   if (!company) {
     return {

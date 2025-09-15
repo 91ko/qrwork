@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, QrCode, Users, Clock, Shield } from 'lucide-react'
+import { ArrowRight, QrCode, Users, Clock, TrendingUp } from 'lucide-react'
 
 export default function HomePage() {
   return (
@@ -106,12 +106,12 @@ export default function HomePage() {
               </div>
               
               <div className="text-center p-6">
-                <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Shield className="h-8 w-8 text-red-600" />
+                <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <TrendingUp className="h-8 w-8 text-orange-600" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">보안</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">분석 및 통계</h3>
                 <p className="text-gray-600">
-                  JWT 기반 인증과 데이터 암호화로 안전한 시스템을 제공합니다.
+                  출퇴근 패턴 분석과 상세한 통계 리포트를 제공합니다.
                 </p>
               </div>
             </div>
