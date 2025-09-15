@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 회사 모델
+model Company {
+  id            String   @id @default(cuid())
+  name          String   // 회사명
+  code          String   @unique // 회사 고유 코드
+  phone         String?  // 회사 전화번호
+  trialEndDate  DateTime // 무료 체험 종료일
+  maxEmployees  Int      @default(10) // 최대 직원 수
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // 관계
+  admins        Admin[]
+  employees     Employee[]
+  qrCodes       QrCode[]
+  attendances   Attendance[]
+
+  @@map("companies")
+}
+
+// 관리자 모델
+model Admin {
+  id        String   @id @default(cuid())
+  name      String   // 관리자 이름
+  email     String   // 이메일
+  password  String   // 해시된 비밀번호
+  role      String   @default("ADMIN")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 관계
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([email, companyId])
+  @@map("admins")
+}
+
+// 직원 모델
+model Employee {
+  id          String   @id @default(cuid())
+  name        String   // 직원 이름
+  email       String?  // 이메일
+  phone       String?  // 전화번호
+  employeeId  String?  // 사번
+  department  String?  // 부서
+  position    String?  // 직급
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 관계
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  attendances Attendance[]
+
+  @@unique([employeeId, companyId])
+  @@map("employees")
+}
+
+// QR 코드 모델
+model QrCode {
+  id          String   @id @default(cuid())
+  name        String   // QR 코드 이름
+  location    String?  // 위치 정보
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 관계
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  attendances Attendance[]
+
+  @@map("qr_codes")
+}
+
+// 출퇴근 기록 모델
+model Attendance {
+  id        String   @id @default(cuid())
+  type      String   // "CHECK_IN" 또는 "CHECK_OUT"
+  timestamp DateTime @default(now())
+  location  String?  // 스캔 위치
+  notes     String?  // 메모
+  createdAt DateTime @default(now())
+
+  // 관계
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeeId  String
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  qrCodeId    String
+  qrCode      QrCode @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
+
+  @@map("attendances")
+}
