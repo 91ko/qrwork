@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     trialEndDate.setDate(trialEndDate.getDate() + 14)
 
     // 트랜잭션으로 회사와 관리자 생성
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // 회사 생성
       const company = await tx.company.create({
         data: {
