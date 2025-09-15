@@ -20,10 +20,7 @@ export async function POST(request: NextRequest) {
 
     // 회사 확인
     const company = await prisma.company.findUnique({
-      where: { code: companyCode },
-      include: {
-        admins: true
-      }
+      where: { code: companyCode }
     })
 
     if (!company) {
@@ -49,7 +46,12 @@ export async function POST(request: NextRequest) {
     }
 
     // 관리자 확인
-    const admin = company.admins.find((admin) => admin.email === email)
+    const admin = await prisma.admin.findFirst({
+      where: {
+        email: email,
+        companyId: company.id
+      }
+    })
 
     if (!admin) {
       return NextResponse.json(
