@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { 
   QrCode, 
@@ -29,10 +29,28 @@ interface RecentAttendance {
   timestamp: string
 }
 
+interface AdminInfo {
+  id: string
+  name: string
+  email: string
+  role: string
+}
+
+interface CompanyInfo {
+  id: string
+  name: string
+  code: string
+  trialEndDate: string
+  isActive: boolean
+}
+
 export default function AdminDashboard() {
   const params = useParams()
+  const router = useRouter()
   const companyCode = params.code as string
   
+  const [admin, setAdmin] = useState<AdminInfo | null>(null)
+  const [company, setCompany] = useState<CompanyInfo | null>(null)
   const [stats, setStats] = useState<DashboardStats>({
     totalEmployees: 0,
     activeEmployees: 0,
@@ -41,46 +59,84 @@ export default function AdminDashboard() {
   })
   const [recentAttendances, setRecentAttendances] = useState<RecentAttendance[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   useEffect(() => {
-    // 실제로는 API 호출
-    // 임시 데이터
-    setTimeout(() => {
-      setStats({
-        totalEmployees: 25,
-        activeEmployees: 23,
-        todayAttendances: 18,
-        qrCodes: 3
-      })
-      
-      setRecentAttendances([
-        {
-          id: '1',
-          employeeName: '김철수',
-          type: 'CHECK_IN',
-          timestamp: '2024-01-15 09:15:00'
-        },
-        {
-          id: '2',
-          employeeName: '이영희',
-          type: 'CHECK_IN',
-          timestamp: '2024-01-15 09:20:00'
-        },
-        {
-          id: '3',
-          employeeName: '박민수',
-          type: 'CHECK_OUT',
-          timestamp: '2024-01-15 18:30:00'
-        }
-      ])
-      
-      setIsLoading(false)
-    }, 1000)
+    checkAuthStatus()
   }, [])
 
-  const handleLogout = () => {
-    // 실제로는 로그아웃 API 호출
-    window.location.href = `/company/${companyCode}`
+  const checkAuthStatus = async () => {
+    try {
+      const response = await fetch('/api/auth/me', {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setAdmin(data.admin)
+        setCompany(data.company)
+        setIsAuthenticated(true)
+        
+        // 회사 코드가 일치하는지 확인
+        if (data.company.code !== companyCode) {
+          router.push(`/company/${data.company.code}/admin/dashboard`)
+          return
+        }
+        
+        // 대시보드 데이터 로드
+        loadDashboardData()
+      } else {
+        // 로그인되지 않은 경우 로그인 페이지로 이동
+        router.push(`/company/${companyCode}/admin`)
+      }
+    } catch (error) {
+      console.error('인증 확인 에러:', error)
+      router.push(`/company/${companyCode}/admin`)
+    }
+  }
+
+  const loadDashboardData = async () => {
+    try {
+      // 통계 데이터 조회
+      const statsResponse = await fetch('/api/admin/dashboard/stats', {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json()
+        setStats(statsData)
+      }
+
+      // 최근 출퇴근 기록 조회
+      const attendancesResponse = await fetch('/api/admin/dashboard/recent-attendances', {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      if (attendancesResponse.ok) {
+        const attendancesData = await attendancesResponse.json()
+        setRecentAttendances(attendancesData)
+      }
+      
+      setIsLoading(false)
+    } catch (error) {
+      console.error('대시보드 데이터 로드 에러:', error)
+      setIsLoading(false)
+    }
+  }
+
+  const handleLogout = async () => {
+    try {
+      // 쿠키에서 토큰 제거
+      document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+      // 로그인 페이지로 이동
+      router.push(`/company/${companyCode}/admin`)
+    } catch (error) {
+      console.error('로그아웃 에러:', error)
+      window.location.href = `/company/${companyCode}`
+    }
   }
 
   if (isLoading) {
@@ -103,6 +159,11 @@ export default function AdminDashboard() {
               <span className="ml-4 text-lg text-gray-600">- 관리자 대시보드</span>
             </div>
             <div className="flex items-center space-x-4">
+              {admin && (
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">{admin.name}</span>님
+                </div>
+              )}
               <span className="text-sm text-gray-500">회사 코드: {companyCode}</span>
               <button
                 onClick={handleLogout}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { QrCode, Eye, EyeOff, LogIn } from 'lucide-react'
 
@@ -16,6 +16,37 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+
+  useEffect(() => {
+    checkAuthStatus()
+  }, [])
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await fetch('/api/auth/me', {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        // 이미 로그인된 경우 대시보드로 이동
+        if (data.company.code === companyCode) {
+          router.push(`/company/${companyCode}/admin/dashboard`)
+        } else {
+          // 다른 회사의 관리자인 경우 해당 회사 대시보드로 이동
+          router.push(`/company/${data.company.code}/admin/dashboard`)
+        }
+      } else {
+        // 로그인되지 않은 경우 로그인 폼 표시
+        setIsCheckingAuth(false)
+      }
+    } catch (error) {
+      console.error('인증 확인 에러:', error)
+      setIsCheckingAuth(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -54,6 +85,14 @@ export default function AdminLoginPage() {
       ...formData,
       [e.target.name]: e.target.value
     })
+  }
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    )
   }
 
   return (
