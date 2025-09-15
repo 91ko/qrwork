@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { QrCode, Users, Clock, Shield } from 'lucide-react'
+import { QrCode, Users, Clock, Shield, Phone } from 'lucide-react'
 import Link from 'next/link'
 
 interface CompanyPageProps {
