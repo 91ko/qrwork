@@ -89,12 +89,11 @@ export default function NewQrCodePage() {
     })
   }
 
-  // 주소를 위도/경도로 변환하는 함수
+  // 주소를 위도/경도로 변환하는 함수 (OpenStreetMap Nominatim 사용)
   const geocodeAddress = async (address: string): Promise<LocationData | null> => {
     try {
-      // 실제 환경에서는 Google Maps Geocoding API나 다른 지오코딩 서비스를 사용
-      // 여기서는 간단한 예시로 구현
-      const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN || 'pk.test'}`)
+      // OpenStreetMap Nominatim API 사용 (무료)
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&countrycodes=kr`)
       
       if (!response.ok) {
         throw new Error('지오코딩 실패')
@@ -102,12 +101,12 @@ export default function NewQrCodePage() {
 
       const data = await response.json()
       
-      if (data.features && data.features.length > 0) {
-        const [longitude, latitude] = data.features[0].center
+      if (data && data.length > 0) {
+        const result = data[0]
         return {
-          address: data.features[0].place_name,
-          latitude,
-          longitude
+          address: result.display_name,
+          latitude: parseFloat(result.lat),
+          longitude: parseFloat(result.lon)
         }
       }
       

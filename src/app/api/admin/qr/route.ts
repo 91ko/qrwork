@@ -70,12 +70,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, location } = body
+    const { name, type, location, latitude, longitude, radius, isActive } = body
 
     // 유효성 검사
-    if (!name) {
+    if (!name || !type) {
       return NextResponse.json(
-        { message: 'QR 코드 이름을 입력해주세요.' },
+        { message: 'QR 코드 이름과 타입을 입력해주세요.' },
+        { status: 400 }
+      )
+    }
+
+    if (type !== 'CHECK_IN' && type !== 'CHECK_OUT') {
+      return NextResponse.json(
+        { message: '올바른 QR 코드 타입을 선택해주세요.' },
         { status: 400 }
       )
     }
@@ -84,16 +91,20 @@ export async function POST(request: NextRequest) {
     const qrData = {
       companyCode: admin.companyCode,
       qrCodeId: 'temp', // 임시 ID, 생성 후 업데이트
-      type: 'attendance'
+      type: type
     }
 
     // QR 코드 생성
     const qrCode = await prisma.qrCode.create({
       data: {
         name,
+        type,
         location: location || null,
+        latitude: latitude || null,
+        longitude: longitude || null,
+        radius: radius || null,
         qrData: JSON.stringify(qrData),
-        isActive: true,
+        isActive: isActive !== undefined ? isActive : true,
         companyId: admin.companyId
       }
     })
@@ -127,7 +138,11 @@ export async function POST(request: NextRequest) {
       qrCode: {
         id: qrCode.id,
         name: qrCode.name,
+        type: qrCode.type,
         location: qrCode.location,
+        latitude: qrCode.latitude,
+        longitude: qrCode.longitude,
+        radius: qrCode.radius,
         qrData: JSON.stringify(updatedQrData),
         qrImageUrl: qrImageDataURL
       }
