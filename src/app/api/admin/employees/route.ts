@@ -69,31 +69,29 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, email, phone, employeeId, department, position } = body
+    const { name, email, phone, username, password, customFields } = body
 
     // 유효성 검사
-    if (!name) {
+    if (!name || !username || !password) {
       return NextResponse.json(
-        { message: '직원 이름을 입력해주세요.' },
+        { message: '이름, 사용자 ID, 비밀번호는 필수입니다.' },
         { status: 400 }
       )
     }
 
-    // 사번 중복 확인
-    if (employeeId) {
-      const existingEmployee = await prisma.employee.findFirst({
-        where: {
-          employeeId: employeeId,
-          companyId: admin.companyId
-        }
-      })
-
-      if (existingEmployee) {
-        return NextResponse.json(
-          { message: '이미 사용 중인 사번입니다.' },
-          { status: 400 }
-        )
+    // 사용자 ID 중복 확인
+    const existingEmployee = await prisma.employee.findFirst({
+      where: {
+        username: username,
+        companyId: admin.companyId
       }
+    })
+
+    if (existingEmployee) {
+      return NextResponse.json(
+        { message: '이미 사용 중인 사용자 ID입니다.' },
+        { status: 400 }
+      )
     }
 
     // 직원 생성

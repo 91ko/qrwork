@@ -52,23 +52,23 @@ model Admin {
 
 // 직원 모델
 model Employee {
-  id          String   @id @default(cuid())
-  name        String   // 직원 이름
-  email       String?  // 이메일
-  phone       String?  // 전화번호
-  employeeId  String?  // 사번
-  department  String?  // 부서
-  position    String?  // 직급
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  name         String   // 직원 이름
+  email        String?  // 이메일
+  phone        String?  // 전화번호
+  username     String   // 사용자 ID
+  password     String   // 해시된 비밀번호
+  customFields String?  // 커스텀 필드 (JSON)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // 관계
   companyId   String
   company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   attendances Attendance[]
 
-  @@unique([employeeId, companyId])
+  @@unique([username, companyId])
   @@map("employees")
 }
 
