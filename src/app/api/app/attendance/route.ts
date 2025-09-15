@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
       attendance: attendance,
       employee: {
         name: employee.name,
-        employeeId: employee.employeeId
+        username: employee.username
       },
       type: attendanceType
     })
