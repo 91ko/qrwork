@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
         timestamp: new Date(),
         employeeId: employee.id,
         companyId: company.id,
-        qrCodeId: undefined // QR 스캔이 아닌 직접 기록
+        qrCodeId: null // QR 스캔이 아닌 직접 기록
       }
     })
 

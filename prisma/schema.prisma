@@ -104,8 +104,8 @@ model Attendance {
   company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   employeeId  String
   employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  qrCodeId    String
-  qrCode      QrCode @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
+  qrCodeId    String?
+  qrCode      QrCode? @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
 
   @@map("attendances")
 }
