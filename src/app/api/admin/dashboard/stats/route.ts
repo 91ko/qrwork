@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       }),
       
       // 활성 직원 수 (오늘 출근한 직원)
-      prisma.attendance.count({
+      prisma.attendance.findMany({
         where: {
           companyId: admin.companyId,
           type: 'CHECK_IN',
@@ -59,8 +59,11 @@ export async function GET(request: NextRequest) {
             lt: tomorrow
           }
         },
+        select: {
+          employeeId: true
+        },
         distinct: ['employeeId']
-      }),
+      }).then(attendances => attendances.length),
       
       // 오늘 출퇴근 기록 수
       prisma.attendance.count({

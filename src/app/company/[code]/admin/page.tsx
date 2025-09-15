@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
 
   useEffect(() => {
     checkAuthStatus()
-  }, [])
+  }, [companyCode, router])
 
   const checkAuthStatus = async () => {
     try {

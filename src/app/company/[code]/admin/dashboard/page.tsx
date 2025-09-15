@@ -63,7 +63,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     checkAuthStatus()
-  }, [])
+  }, [companyCode, router])
 
   const checkAuthStatus = async () => {
     try {
