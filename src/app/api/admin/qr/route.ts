@@ -149,6 +149,7 @@ export async function POST(request: NextRequest) {
         latitude: qrCode.latitude,
         longitude: qrCode.longitude,
         radius: qrCode.radius,
+        isActive: qrCode.isActive,
         qrData: JSON.stringify(updatedQrData),
         qrImageUrl: qrImageDataURL
       }
