@@ -20,6 +20,72 @@ async function getEmployeeFromToken(request: NextRequest) {
   }
 }
 
+// 출퇴근 기록 조회
+export async function GET(request: NextRequest) {
+  try {
+    const employee = await getEmployeeFromToken(request)
+    
+    if (!employee) {
+      return NextResponse.json(
+        { message: '인증이 필요합니다.' },
+        { status: 401 }
+      )
+    }
+
+    const { searchParams } = new URL(request.url)
+    const date = searchParams.get('date')
+
+    // 날짜 범위 설정
+    let startDate = new Date()
+    let endDate = new Date()
+    
+    if (date) {
+      startDate = new Date(date)
+      startDate.setHours(0, 0, 0, 0)
+      endDate = new Date(startDate)
+      endDate.setDate(endDate.getDate() + 1)
+    } else {
+      startDate.setHours(0, 0, 0, 0)
+      endDate.setDate(endDate.getDate() + 1)
+    }
+
+    // 출퇴근 기록 조회
+    const attendances = await prisma.attendance.findMany({
+      where: {
+        employeeId: employee.employeeId,
+        timestamp: {
+          gte: startDate,
+          lt: endDate
+        }
+      },
+      include: {
+        qrCode: {
+          select: {
+            name: true,
+            location: true
+          }
+        }
+      },
+      orderBy: {
+        timestamp: 'asc'
+      }
+    })
+
+    return NextResponse.json({
+      attendances: attendances
+    })
+
+  } catch (error) {
+    console.error('출퇴근 기록 조회 에러:', error)
+    return NextResponse.json(
+      { message: '서버 오류가 발생했습니다.' },
+      { status: 500 }
+    )
+  } finally {
+    await prisma.$disconnect()
+  }
+}
+
 // 출퇴근 기록
 export async function POST(request: NextRequest) {
   try {

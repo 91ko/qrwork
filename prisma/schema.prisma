@@ -28,6 +28,8 @@ model Company {
   qrCodes       QrCode[]
   attendances   Attendance[]
   settings      CompanySettings?
+  leaveRequests LeaveRequest[]
+  employeeLeaves EmployeeLeave[]
 
   @@map("companies")
 }
@@ -68,6 +70,8 @@ model Employee {
   companyId   String
   company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   attendances Attendance[]
+  leaveRequests LeaveRequest[]
+  employeeLeaves EmployeeLeave[]
 
   @@unique([username, companyId])
   @@map("employees")
@@ -128,4 +132,46 @@ model Attendance {
   qrCode      QrCode? @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
 
   @@map("attendances")
+}
+
+// 연차/휴가 신청 모델
+model LeaveRequest {
+  id          String   @id @default(cuid())
+  type        String   // "ANNUAL", "SICK", "PERSONAL", "OTHER"
+  startDate   DateTime
+  endDate     DateTime
+  days        Int      // 신청 일수
+  reason      String?  // 사유
+  status      String   @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
+  adminNote   String?  // 관리자 메모
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 관계
+  employeeId  String
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("leave_requests")
+}
+
+// 직원 연차 정보 모델
+model EmployeeLeave {
+  id              String   @id @default(cuid())
+  totalDays       Int      @default(0) // 총 연차 일수
+  usedDays        Int      @default(0) // 사용한 연차 일수
+  remainingDays   Int      @default(0) // 남은 연차 일수
+  year            Int      // 연도
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // 관계
+  employeeId      String
+  employee        Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  companyId       String
+  company         Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, year])
+  @@map("employee_leaves")
 }
