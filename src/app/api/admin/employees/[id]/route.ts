@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -101,7 +102,7 @@ export async function PUT(
 
     const { id } = await params
     const body = await request.json()
-    const { name, email, phone, employeeId, department, position, isActive } = body
+    const { name, email, phone, username, password, isActive } = body
 
     // 직원이 해당 회사에 속하는지 확인
     const existingEmployee = await prisma.employee.findFirst({
@@ -118,11 +119,11 @@ export async function PUT(
       )
     }
 
-    // 사번 중복 확인 (자신 제외)
-    if (employeeId && employeeId !== existingEmployee.employeeId) {
+    // 사용자 ID 중복 확인 (자신 제외)
+    if (username && username !== existingEmployee.username) {
       const duplicateEmployee = await prisma.employee.findFirst({
         where: {
-          employeeId: employeeId,
+          username: username,
           companyId: admin.companyId,
           id: { not: id }
         }
@@ -130,24 +131,30 @@ export async function PUT(
 
       if (duplicateEmployee) {
         return NextResponse.json(
-          { message: '이미 사용 중인 사번입니다.' },
+          { message: '이미 사용 중인 사용자 ID입니다.' },
           { status: 400 }
         )
       }
     }
 
+    // 업데이트할 데이터 준비
+    const updateData: any = {
+      name: name || existingEmployee.name,
+      email: email || existingEmployee.email,
+      phone: phone || existingEmployee.phone,
+      username: username || existingEmployee.username,
+      isActive: isActive !== undefined ? isActive : existingEmployee.isActive
+    }
+
+    // 비밀번호가 제공된 경우에만 해시화하여 업데이트
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 12)
+    }
+
     // 직원 정보 수정
     const updatedEmployee = await prisma.employee.update({
       where: { id: id },
-      data: {
-        name: name || existingEmployee.name,
-        email: email || existingEmployee.email,
-        phone: phone || existingEmployee.phone,
-        employeeId: employeeId || existingEmployee.employeeId,
-        department: department || existingEmployee.department,
-        position: position || existingEmployee.position,
-        isActive: isActive !== undefined ? isActive : existingEmployee.isActive
-      }
+      data: updateData
     })
 
     return NextResponse.json({
