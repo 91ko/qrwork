@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient()
+// Prisma 클라이언트 인스턴스 생성
+const prisma = new PrismaClient({
+  log: ['query', 'info', 'warn', 'error'],
+})
 
 // 회사 고유 코드 생성 함수
 function generateCompanyCode(): string {
@@ -16,7 +19,11 @@ function generateCompanyCode(): string {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('회사 등록 API 호출됨')
+    
     const body = await request.json()
+    console.log('받은 데이터:', body)
+    
     const { 
       companyName, 
       companyPhone, 
@@ -49,10 +56,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 데이터베이스 연결 테스트
+    console.log('데이터베이스 연결 테스트 중...')
+    await prisma.$connect()
+    console.log('데이터베이스 연결 성공')
+
     // 이메일 중복 확인
+    console.log('이메일 중복 확인 중...')
     const existingAdmin = await prisma.admin.findFirst({
       where: { email }
     })
+    console.log('이메일 중복 확인 완료:', existingAdmin ? '중복됨' : '사용 가능')
 
     if (existingAdmin) {
       return NextResponse.json(
