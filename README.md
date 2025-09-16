@@ -33,7 +33,7 @@ QR워크는 QR 코드를 활용한 스마트한 출퇴근 관리 시스템입니
 - [x] 회사 등록 및 고유 코드 생성
 - [x] 14일 무료 체험 시스템
 - [x] 회사별 독립적인 관리 환경
-- [x] 관리자 계정 생성 및 관리
+- [x] 관리자 계정 생성 및 관리 
 
 ### 🔐 인증 시스템
 - [x] JWT 기반 보안 인증
@@ -161,13 +161,17 @@ npm install
 ### 3. 환경변수 설정
 ```bash
 # .env 파일 생성
-cp .env.example .env
+touch .env
 
-# 환경변수 설정
+# 환경변수 설정 (.env 파일에 추가)
 DATABASE_URL="postgresql://username:password@localhost:5432/qrwork_db"
 JWT_SECRET="your_jwt_secret_key"
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your_nextauth_secret"
+NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+
+# 최종 관리자 계정 (보안상 중요!)
+SUPER_ADMIN_EMAIL="admin@yourcompany.com"
+SUPER_ADMIN_PASSWORD="your-secure-password-here"
+SUPER_ADMIN_NAME="최종 관리자"
 ```
 
 ### 4. 데이터베이스 설정
@@ -184,12 +188,26 @@ npx prisma generate
 npx prisma db push
 ```
 
-### 5. 개발 서버 실행
+### 5. 최종 관리자 계정 생성
+```bash
+# API를 통해 최종 관리자 계정을 생성합니다
+curl -X POST http://localhost:3000/api/super-admin/init
+
+# 또는 브라우저에서 접속
+# http://localhost:3000/api/super-admin/init
+```
+
+### 6. 개발 서버 실행
 ```bash
 npm run dev
 ```
 
 서버가 실행되면 [http://localhost:3000](http://localhost:3000)에서 확인할 수 있습니다.
+
+### 🔐 최종 관리자 접근
+- **로그인 URL**: [http://localhost:3000/super-admin/login](http://localhost:3000/super-admin/login)
+- **대시보드**: [http://localhost:3000/super-admin/dashboard](http://localhost:3000/super-admin/dashboard)
+- **환경변수에서 설정한 이메일/비밀번호로 로그인**
 
 ## 🚀 Vercel 배포
 
