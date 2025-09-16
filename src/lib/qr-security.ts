@@ -172,7 +172,7 @@ export async function validateQRScan(
 
   } catch (error) {
     logger.error('QR 스캔 검증 에러', {
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       username,
       qrData: qrData.substring(0, 100)
     })
@@ -211,7 +211,7 @@ async function validateLocation(
 
     return { isValid: true }
   } catch (error) {
-    logger.error('위치 검증 에러', { error: error.message })
+    logger.error('위치 검증 에러', { error: error instanceof Error ? error.message : 'Unknown error' })
     return { isValid: false, error: '위치 검증 중 오류가 발생했습니다.' }
   }
 }
@@ -315,7 +315,7 @@ async function recordScanAttempt(
       userAgent: userAgent.substring(0, 100)
     })
   } catch (error) {
-    logger.error('스캔 기록 저장 실패', { error: error.message })
+    logger.error('스캔 기록 저장 실패', { error: error instanceof Error ? error.message : 'Unknown error' })
   }
 }
 
