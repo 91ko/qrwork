@@ -50,7 +50,7 @@ JWT_EXPIRES_IN="7d"
 DATABASE_URL="postgresql://username:password@localhost:5432/database_name?sslmode=require"
 
 # 최종 관리자 계정 (보안상 중요!)
-SUPER_ADMIN_EMAIL="admin@yourcompany.com"
+SUPER_ADMIN_EMAIL="admin@qrwork.co.kr"
 SUPER_ADMIN_PASSWORD="your-secure-password-here"
 SUPER_ADMIN_NAME="최종 관리자"
 

@@ -169,7 +169,7 @@ JWT_SECRET="your_jwt_secret_key"
 NEXT_PUBLIC_BASE_URL="http://localhost:3000"
 
 # 최종 관리자 계정 (보안상 중요!)
-SUPER_ADMIN_EMAIL="admin@yourcompany.com"
+SUPER_ADMIN_EMAIL="admin@qrwork.co.kr"
 SUPER_ADMIN_PASSWORD="your-secure-password-here"
 SUPER_ADMIN_NAME="최종 관리자"
 ```
