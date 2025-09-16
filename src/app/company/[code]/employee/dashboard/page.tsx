@@ -269,6 +269,54 @@ export default function EmployeeDashboardPage() {
           </div>
         </div>
 
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Link
+            href={`/company/${companyCode}/scan`}
+            className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+          >
+            <div className="flex items-center">
+              <div className="bg-blue-100 p-3 rounded-full">
+                <QrCode className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-gray-900">QR 스캔</h3>
+                <p className="text-gray-600">출퇴근 기록하기</p>
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            href={`/company/${companyCode}/employee/leave`}
+            className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+          >
+            <div className="flex items-center">
+              <div className="bg-green-100 p-3 rounded-full">
+                <Calendar className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-gray-900">연차 신청</h3>
+                <p className="text-gray-600">휴가 신청 및 현황</p>
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            href={`/company/${companyCode}/employee/profile`}
+            className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+          >
+            <div className="flex items-center">
+              <div className="bg-purple-100 p-3 rounded-full">
+                <User className="h-6 w-6 text-purple-600" />
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-gray-900">프로필 설정</h3>
+                <p className="text-gray-600">개인정보 관리</p>
+              </div>
+            </div>
+          </Link>
+        </div>
+
         {/* Date Filter */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="flex items-center justify-between">

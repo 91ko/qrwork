@@ -270,6 +270,14 @@ export default function AdminDashboard() {
                   <Clock className="h-5 w-5 text-purple-600 mr-3" />
                   <span className="text-purple-900">출퇴근 관리</span>
                 </Link>
+                
+                <Link
+                  href={`/company/${companyCode}/admin/statistics`}
+                  className="flex items-center p-3 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
+                >
+                  <TrendingUp className="h-5 w-5 text-orange-600 mr-3" />
+                  <span className="text-orange-900">출퇴근 통계</span>
+                </Link>
               </div>
             </div>
           </div>
