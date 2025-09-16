@@ -135,15 +135,20 @@ export default function EmployeeManagementPage() {
     // 커스텀 필드 파싱
     try {
       const parsedCustomFields = JSON.parse(employee.customFields || '{}')
-      const fieldsArray = Object.entries(parsedCustomFields as Record<string, string>).map(([key, value]) => ({
-        id: key,
-        name: key,
-        type: 'text',
-        value: value,
-        showInAttendance: true
-      }))
-      setCustomFields(fieldsArray)
-    } catch {
+      if (parsedCustomFields && typeof parsedCustomFields === 'object') {
+        const fieldsArray = Object.entries(parsedCustomFields as Record<string, string>).map(([key, value]) => ({
+          id: key,
+          name: key,
+          type: 'text',
+          value: String(value || ''),
+          showInAttendance: true
+        }))
+        setCustomFields(fieldsArray)
+      } else {
+        setCustomFields([])
+      }
+    } catch (error) {
+      console.error('커스텀 필드 파싱 에러:', error)
       setCustomFields([])
     }
     
@@ -160,9 +165,12 @@ export default function EmployeeManagementPage() {
   }
 
   const handleEditCustomFieldChange = (fieldId: string, value: string) => {
-    setCustomFields(prev => prev.map(field => 
-      field.id === fieldId ? { ...field, value } : field
-    ))
+    setCustomFields(prev => {
+      if (!Array.isArray(prev)) return []
+      return prev.map(field => 
+        field && field.id === fieldId ? { ...field, value } : field
+      ).filter(field => field !== null && field !== undefined)
+    })
   }
 
   const handleEditSubmit = async (e: React.FormEvent) => {
@@ -569,26 +577,30 @@ export default function EmployeeManagementPage() {
                   <div className="border-t pt-6">
                     <h3 className="text-lg font-medium text-gray-900 mb-4">커스텀 필드</h3>
                     <div className="space-y-4">
-                      {customFields.map((field) => {
-                        // 필드 객체가 유효한지 확인
-                        if (!field || typeof field !== 'object' || !field.id) {
-                          return null
-                        }
-                        
-                        return (
-                          <div key={field.id}>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              {field.name}
-                            </label>
-                            <input
-                              type="text"
-                              value={field.value}
-                              onChange={(e) => handleEditCustomFieldChange(field.id, e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                          </div>
-                        )
-                      })}
+                      {Array.isArray(customFields) && customFields.length > 0 ? (
+                        customFields.map((field) => {
+                          // 필드 객체가 유효한지 확인
+                          if (!field || typeof field !== 'object' || !field.id) {
+                            return null
+                          }
+                          
+                          return (
+                            <div key={field.id}>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                {field.name || 'Unknown Field'}
+                              </label>
+                              <input
+                                type="text"
+                                value={field.value || ''}
+                                onChange={(e) => handleEditCustomFieldChange(field.id, e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                            </div>
+                          )
+                        })
+                      ) : (
+                        <p className="text-gray-500 text-sm">커스텀 필드가 없습니다.</p>
+                      )}
                     </div>
                   </div>
                 )}
