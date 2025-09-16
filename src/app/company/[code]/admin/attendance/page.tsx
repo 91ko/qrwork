@@ -47,6 +47,9 @@ export default function AttendanceRecordsPage() {
   const [typeFilter, setTypeFilter] = useState('ALL')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [viewMode, setViewMode] = useState<'monthly' | 'daily'>('monthly')
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)) // YYYY-MM 형식
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]) // YYYY-MM-DD 형식
   const itemsPerPage = 20
 
   const loadAttendances = useCallback(async (page = 1) => {
@@ -267,9 +270,10 @@ export default function AttendanceRecordsPage() {
                 type="button"
                 onClick={handleExport}
                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium flex items-center justify-center"
-                title="Excel 내보내기"
+                title="엑셀 내보내기"
               >
-                <Download className="h-4 w-4" />
+                <Download className="h-4 w-4 mr-2" />
+                엑셀 내보내기
               </button>
             </div>
           </form>
