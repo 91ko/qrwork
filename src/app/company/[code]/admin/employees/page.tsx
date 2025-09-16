@@ -45,7 +45,7 @@ export default function EmployeeManagementPage() {
     confirmPassword: '',
     isActive: true
   })
-  const [customFields, setCustomFields] = useState<Array<{id: string, name: string, type: string, value: string, showInAttendance: boolean}>>([])
+  const [customFields, setCustomFields] = useState<Array<{id: string, name: string, type: string, value: string}>>([])
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isEditLoading, setIsEditLoading] = useState(false)
   const [editError, setEditError] = useState('')
@@ -140,8 +140,7 @@ export default function EmployeeManagementPage() {
           id: key,
           name: key,
           type: 'text',
-          value: String(value || ''),
-          showInAttendance: true
+          value: String(value || '')
         }))
         setCustomFields(fieldsArray)
       } else {
@@ -167,9 +166,17 @@ export default function EmployeeManagementPage() {
   const handleEditCustomFieldChange = (fieldId: string, value: string) => {
     setCustomFields(prev => {
       if (!Array.isArray(prev)) return []
-      return prev.map(field => 
-        field && field.id === fieldId ? { ...field, value } : field
-      ).filter(field => field !== null && field !== undefined)
+      return prev.map(field => {
+        if (field && field.id === fieldId) {
+          return {
+            id: field.id,
+            name: field.name || '',
+            type: field.type || 'text',
+            value: value
+          }
+        }
+        return field
+      }).filter(field => field !== null && field !== undefined)
     })
   }
 
@@ -573,34 +580,30 @@ export default function EmployeeManagementPage() {
                 </div>
 
                 {/* 커스텀 필드 */}
-                {customFields.length > 0 && (
+                {customFields && customFields.length > 0 && (
                   <div className="border-t pt-6">
                     <h3 className="text-lg font-medium text-gray-900 mb-4">커스텀 필드</h3>
                     <div className="space-y-4">
-                      {Array.isArray(customFields) && customFields.length > 0 ? (
-                        customFields.map((field) => {
-                          // 필드 객체가 유효한지 확인
-                          if (!field || typeof field !== 'object' || !field.id) {
-                            return null
-                          }
-                          
-                          return (
-                            <div key={field.id}>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                {field.name || 'Unknown Field'}
-                              </label>
-                              <input
-                                type="text"
-                                value={field.value || ''}
-                                onChange={(e) => handleEditCustomFieldChange(field.id, e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              />
-                            </div>
-                          )
-                        })
-                      ) : (
-                        <p className="text-gray-500 text-sm">커스텀 필드가 없습니다.</p>
-                      )}
+                      {customFields.map((field, index) => {
+                        // 필드 객체가 유효한지 확인
+                        if (!field || typeof field !== 'object' || !field.id) {
+                          return null
+                        }
+                        
+                        return (
+                          <div key={`${field.id}-${index}`}>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              {field.name || 'Unknown Field'}
+                            </label>
+                            <input
+                              type="text"
+                              value={field.value || ''}
+                              onChange={(e) => handleEditCustomFieldChange(field.id, e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
