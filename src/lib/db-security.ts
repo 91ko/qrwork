@@ -170,7 +170,7 @@ export function startDatabaseMonitoring(): void {
 
 // 트랜잭션 보안 래퍼
 export async function secureTransaction<T>(
-  operations: (tx: PrismaClient) => Promise<T>
+  operations: (tx: any) => Promise<T>
 ): Promise<T> {
   const client = getPrismaClient()
   
