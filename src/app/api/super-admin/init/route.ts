@@ -5,14 +5,29 @@ import prisma from '@/lib/prisma'
 // 최종 관리자 계정 초기화 (환경변수에서 읽어서 생성)
 export async function POST(request: NextRequest) {
   try {
+    console.log('최종 관리자 계정 초기화 시작')
+    
     // 환경변수에서 최종 관리자 정보 읽기
     const superAdminEmail = process.env.SUPER_ADMIN_EMAIL
     const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD
     const superAdminName = process.env.SUPER_ADMIN_NAME || '최종 관리자'
 
+    console.log('환경변수 확인:', {
+      email: superAdminEmail ? '설정됨' : '미설정',
+      password: superAdminPassword ? '설정됨' : '미설정',
+      name: superAdminName
+    })
+
     if (!superAdminEmail || !superAdminPassword) {
+      console.log('환경변수 누락:', { email: !!superAdminEmail, password: !!superAdminPassword })
       return NextResponse.json(
-        { message: '최종 관리자 환경변수가 설정되지 않았습니다.' },
+        { 
+          message: '최종 관리자 환경변수가 설정되지 않았습니다.',
+          details: {
+            email: superAdminEmail ? '설정됨' : '미설정',
+            password: superAdminPassword ? '설정됨' : '미설정'
+          }
+        },
         { status: 500 }
       )
     }
@@ -22,17 +37,31 @@ export async function POST(request: NextRequest) {
       where: { email: superAdminEmail }
     })
 
+    console.log('기존 계정 확인:', { exists: !!existingSuperAdmin })
+
     if (existingSuperAdmin) {
       return NextResponse.json(
-        { message: '최종 관리자 계정이 이미 존재합니다.' },
-        { status: 400 }
+        { 
+          message: '최종 관리자 계정이 이미 존재합니다.',
+          superAdmin: {
+            id: existingSuperAdmin.id,
+            name: existingSuperAdmin.name,
+            email: existingSuperAdmin.email,
+            isActive: existingSuperAdmin.isActive,
+            createdAt: existingSuperAdmin.createdAt
+          }
+        },
+        { status: 200 }
       )
     }
 
     // 비밀번호 해싱
+    console.log('비밀번호 해싱 시작')
     const hashedPassword = await bcrypt.hash(superAdminPassword, 12)
+    console.log('비밀번호 해싱 완료')
 
     // 최종 관리자 계정 생성
+    console.log('계정 생성 시작')
     const superAdmin = await prisma.superAdmin.create({
       data: {
         name: superAdminName,
@@ -49,6 +78,8 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    console.log('계정 생성 완료:', superAdmin.email)
+
     return NextResponse.json({
       message: '최종 관리자 계정이 성공적으로 생성되었습니다.',
       superAdmin
@@ -57,7 +88,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('최종 관리자 계정 생성 에러:', error)
     return NextResponse.json(
-      { message: '서버 오류가 발생했습니다.' },
+      { 
+        message: '서버 오류가 발생했습니다.',
+        error: error instanceof Error ? error.message : '알 수 없는 오류',
+        stack: error instanceof Error ? error.stack : undefined
+      },
       { status: 500 }
     )
   }
