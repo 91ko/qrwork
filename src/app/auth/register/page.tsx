@@ -21,6 +21,12 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [agreeTerms, setAgreeTerms] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [registeredCompany, setRegisteredCompany] = useState<{
+    companyCode: string
+    companyName: string
+    trialEndDate: string
+  } | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -54,8 +60,13 @@ export default function RegisterPage() {
 
       if (response.ok) {
         const data = await response.json()
-        // 회원가입 성공 시 회사 페이지로 이동
-        router.push(`/company/${data.companyCode}`)
+        // 회원가입 성공 시 회사 정보 저장하고 팝업 표시
+        setRegisteredCompany({
+          companyCode: data.companyCode,
+          companyName: data.companyName,
+          trialEndDate: data.trialEndDate
+        })
+        setShowSuccessModal(true)
       } else {
         const data = await response.json()
         setError(data.message || '회원가입에 실패했습니다.')
@@ -315,6 +326,80 @@ export default function RegisterPage() {
           </ul>
         </div>
       </div>
+
+      {/* 성공 모달 */}
+      {showSuccessModal && registeredCompany && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white">
+            <div className="mt-3 text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                회사 등록이 완료되었습니다!
+              </h3>
+              
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <div className="flex items-center mb-2">
+                  <svg className="h-5 w-5 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm font-medium text-yellow-800">중요: 회사 코드를 메모해주세요!</span>
+                </div>
+                <p className="text-sm text-yellow-700">
+                  이 코드는 관리자 로그인과 직원 초대에 필요합니다.
+                </p>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                <div className="text-sm text-gray-600 mb-2">회사 정보</div>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">회사명:</span>
+                    <span className="text-sm font-medium text-gray-900">{registeredCompany.companyName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">회사 코드:</span>
+                    <span className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                      {registeredCompany.companyCode}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">체험 종료일:</span>
+                    <span className="text-sm text-gray-900">
+                      {new Date(registeredCompany.trialEndDate).toLocaleDateString('ko-KR')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(registeredCompany.companyCode)
+                    alert('회사 코드가 클립보드에 복사되었습니다!')
+                  }}
+                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  회사 코드 복사
+                </button>
+                <button
+                  onClick={() => {
+                    setShowSuccessModal(false)
+                    router.push(`/company/${registeredCompany.companyCode}`)
+                  }}
+                  className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  관리자 페이지로 이동
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
