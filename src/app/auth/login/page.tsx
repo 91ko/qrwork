@@ -188,7 +188,7 @@ export default function LoginPage() {
           <div className="space-y-2 text-sm text-gray-600">
             <p>• 회사 코드를 잊으셨나요? 회사 등록 시 이메일로 발송된 코드를 확인해주세요</p>
             <p>• 비밀번호를 잊으셨나요? 관리자 계정 복구를 위해 고객지원팀에 문의해주세요</p>
-            <p>• 계정 문제가 있으신가요? <a href="mailto:support@qrwork.co.kr" className="text-blue-600 hover:text-blue-500">support@qrwork.co.kr</a></p>
+            <p>• 계정 문제가 있으신가요? <a href="mailto:qrworks.s@gmail.com" className="text-blue-600 hover:text-blue-500">support@qrwork.co.kr</a></p>
           </div>
         </div>
       </div>
