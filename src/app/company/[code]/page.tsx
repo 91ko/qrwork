@@ -8,22 +8,23 @@ interface CompanyPageProps {
   }>
 }
 
-// 회사 정보를 가져오는 함수 (실제로는 API에서 가져올 예정)
+// 회사 정보를 가져오는 함수
 async function getCompany(code: string) {
-  // TODO: 실제 API 호출로 대체
-  // const response = await fetch(`/api/company/${code}`)
-  // if (!response.ok) return null
-  // return response.json()
-  
-  // 임시 데이터
-  return {
-    id: '1',
-    name: '테크코리아',
-    code: code,
-    phone: '02-1234-5678',
-    trialEndDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14일 후
-    maxEmployees: 10,
-    isActive: true
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const response = await fetch(`${baseUrl}/api/company/${code}`, {
+      cache: 'no-store' // 실시간 데이터를 위해 캐시 비활성화
+    })
+    
+    if (!response.ok) {
+      return null
+    }
+    
+    const data = await response.json()
+    return data.company
+  } catch (error) {
+    console.error('회사 정보 조회 에러:', error)
+    return null
   }
 }
 
@@ -35,7 +36,8 @@ export default async function CompanyPage({ params }: CompanyPageProps) {
     notFound()
   }
 
-  const trialDaysLeft = Math.ceil((company.trialEndDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+  const trialEndDate = new Date(company.trialEndDate)
+  const trialDaysLeft = Math.ceil((trialEndDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
