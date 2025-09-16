@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined
     })
-    return errorHandlingMiddleware(error, request)
+    return errorHandlingMiddleware(error instanceof Error ? error : new Error('Unknown error'), request)
   } finally {
     await prisma.$disconnect()
   }
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined
     })
-    return errorHandlingMiddleware(error, request)
+    return errorHandlingMiddleware(error instanceof Error ? error : new Error('Unknown error'), request)
   } finally {
     await prisma.$disconnect()
   }
