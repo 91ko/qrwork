@@ -7,8 +7,11 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json()
 
+    console.log('최종 관리자 로그인 시도:', { email: email?.substring(0, 3) + '***' })
+
     // 입력값 검증
     if (!email || !password) {
+      console.log('입력값 누락:', { email: !!email, password: !!password })
       return NextResponse.json(
         { message: '이메일과 비밀번호를 입력해주세요.' },
         { status: 400 }
@@ -20,7 +23,14 @@ export async function POST(request: NextRequest) {
       where: { email: email.toLowerCase() }
     })
 
+    console.log('최종 관리자 조회 결과:', { 
+      found: !!superAdmin, 
+      email: superAdmin?.email,
+      isActive: superAdmin?.isActive 
+    })
+
     if (!superAdmin) {
+      console.log('최종 관리자를 찾을 수 없음:', email.toLowerCase())
       return NextResponse.json(
         { message: '이메일 또는 비밀번호가 올바르지 않습니다.' },
         { status: 401 }
@@ -28,6 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!superAdmin.isActive) {
+      console.log('비활성화된 계정:', superAdmin.email)
       return NextResponse.json(
         { message: '비활성화된 계정입니다.' },
         { status: 401 }
@@ -36,7 +47,10 @@ export async function POST(request: NextRequest) {
 
     // 비밀번호 확인
     const isPasswordValid = await bcrypt.compare(password, superAdmin.password)
+    console.log('비밀번호 확인 결과:', { isValid: isPasswordValid })
+    
     if (!isPasswordValid) {
+      console.log('비밀번호 불일치:', superAdmin.email)
       return NextResponse.json(
         { message: '이메일 또는 비밀번호가 올바르지 않습니다.' },
         { status: 401 }
