@@ -152,7 +152,7 @@ export default function StatisticsPage() {
     if (isAuthenticated) {
       loadStatistics()
     }
-  }, [isAuthenticated, loadStatistics])
+  }, [isAuthenticated, selectedPeriod, selectedMonth])
 
   if (isLoading) {
     return (

@@ -126,6 +126,7 @@ export async function GET(request: NextRequest) {
       include: {
         employee: {
           select: {
+            id: true,
             name: true,
             username: true,
             email: true,
