@@ -61,8 +61,17 @@ export default function AttendanceRecordsPage() {
       })
       
       if (searchTerm) params.append('search', searchTerm)
-      if (dateFilter) params.append('date', dateFilter)
       if (typeFilter !== 'ALL') params.append('type', typeFilter)
+      
+      // 월별/일별 보기에 따른 날짜 필터 설정
+      if (viewMode === 'monthly') {
+        params.append('month', selectedMonth)
+      } else if (viewMode === 'daily') {
+        params.append('date', selectedDate)
+      }
+      
+      // 추가 날짜 필터가 있으면 적용
+      if (dateFilter) params.append('additionalDate', dateFilter)
 
       const response = await fetch(`/api/admin/attendance?${params}`, {
         method: 'GET',
@@ -82,7 +91,7 @@ export default function AttendanceRecordsPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [searchTerm, dateFilter, typeFilter, itemsPerPage])
+  }, [searchTerm, dateFilter, typeFilter, itemsPerPage, viewMode, selectedMonth, selectedDate])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -94,8 +103,17 @@ export default function AttendanceRecordsPage() {
     try {
       const params = new URLSearchParams()
       if (searchTerm) params.append('search', searchTerm)
-      if (dateFilter) params.append('date', dateFilter)
       if (typeFilter !== 'ALL') params.append('type', typeFilter)
+      
+      // 월별/일별 보기에 따른 날짜 필터 설정
+      if (viewMode === 'monthly') {
+        params.append('month', selectedMonth)
+      } else if (viewMode === 'daily') {
+        params.append('date', selectedDate)
+      }
+      
+      // 추가 날짜 필터가 있으면 적용
+      if (dateFilter) params.append('additionalDate', dateFilter)
 
       const response = await fetch(`/api/admin/attendance/export?${params}`, {
         method: 'GET',
@@ -107,7 +125,10 @@ export default function AttendanceRecordsPage() {
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = `attendance_records_${new Date().toISOString().split('T')[0]}.xlsx`
+        const filename = viewMode === 'monthly' 
+          ? `attendance_records_${selectedMonth}.csv`
+          : `attendance_records_${selectedDate}.csv`
+        a.download = filename
         document.body.appendChild(a)
         a.click()
         window.URL.revokeObjectURL(url)
@@ -157,6 +178,14 @@ export default function AttendanceRecordsPage() {
   useEffect(() => {
     checkAuthStatus()
   }, [checkAuthStatus])
+
+  // 뷰 모드나 날짜가 변경될 때 데이터 다시 로드
+  useEffect(() => {
+    if (isAuthenticated) {
+      setCurrentPage(1)
+      loadAttendances(1)
+    }
+  }, [viewMode, selectedMonth, selectedDate, isAuthenticated, loadAttendances])
 
   if (isLoading) {
     return (
@@ -209,6 +238,75 @@ export default function AttendanceRecordsPage() {
           <p className="text-gray-600">직원들의 출퇴근 기록을 조회하고 관리하세요</p>
         </div>
 
+        {/* View Mode Selection */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900">보기 모드</h2>
+            <div className="flex items-center space-x-4">
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('monthly')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    viewMode === 'monthly'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  월별 보기
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('daily')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    viewMode === 'daily'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  일별 보기
+                </button>
+              </div>
+              
+              {viewMode === 'monthly' && (
+                <div className="flex items-center space-x-2">
+                  <label htmlFor="month" className="text-sm font-medium text-gray-700">
+                    월 선택:
+                  </label>
+                  <input
+                    type="month"
+                    id="month"
+                    value={selectedMonth}
+                    onChange={(e) => {
+                      setSelectedMonth(e.target.value)
+                      setDateFilter('') // 월별 보기일 때는 날짜 필터 초기화
+                    }}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  />
+                </div>
+              )}
+              
+              {viewMode === 'daily' && (
+                <div className="flex items-center space-x-2">
+                  <label htmlFor="date" className="text-sm font-medium text-gray-700">
+                    날짜 선택:
+                  </label>
+                  <input
+                    type="date"
+                    id="date"
+                    value={selectedDate}
+                    onChange={(e) => {
+                      setSelectedDate(e.target.value)
+                      setDateFilter(e.target.value) // 일별 보기일 때는 날짜 필터에 설정
+                    }}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -230,15 +328,16 @@ export default function AttendanceRecordsPage() {
             </div>
 
             <div>
-              <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-                날짜
+              <label htmlFor="additionalDate" className="block text-sm font-medium text-gray-700 mb-2">
+                추가 날짜 필터
               </label>
               <input
                 type="date"
-                id="date"
+                id="additionalDate"
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                placeholder="선택사항"
               />
             </div>
 

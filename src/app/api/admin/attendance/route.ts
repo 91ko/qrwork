@@ -35,6 +35,8 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const search = searchParams.get('search') || ''
     const date = searchParams.get('date') || ''
+    const month = searchParams.get('month') || ''
+    const additionalDate = searchParams.get('additionalDate') || ''
     const type = searchParams.get('type') || 'ALL'
 
     const skip = (page - 1) * limit
@@ -66,8 +68,19 @@ export async function GET(request: NextRequest) {
       ]
     }
 
-    // 날짜 필터
-    if (date) {
+    // 날짜 필터 (월별/일별 보기)
+    if (month) {
+      // 월별 보기: YYYY-MM 형식
+      const startDate = new Date(month + '-01')
+      const endDate = new Date(startDate)
+      endDate.setMonth(endDate.getMonth() + 1)
+
+      where.timestamp = {
+        gte: startDate,
+        lt: endDate
+      }
+    } else if (date) {
+      // 일별 보기: YYYY-MM-DD 형식
       const startDate = new Date(date)
       startDate.setHours(0, 0, 0, 0)
       const endDate = new Date(startDate)
@@ -76,6 +89,33 @@ export async function GET(request: NextRequest) {
       where.timestamp = {
         gte: startDate,
         lt: endDate
+      }
+    }
+
+    // 추가 날짜 필터 (선택사항)
+    if (additionalDate) {
+      const additionalStartDate = new Date(additionalDate)
+      additionalStartDate.setHours(0, 0, 0, 0)
+      const additionalEndDate = new Date(additionalStartDate)
+      additionalEndDate.setDate(additionalEndDate.getDate() + 1)
+
+      // 기존 날짜 필터가 있으면 AND 조건으로 추가
+      if (where.timestamp) {
+        where.AND = [
+          { timestamp: where.timestamp },
+          {
+            timestamp: {
+              gte: additionalStartDate,
+              lt: additionalEndDate
+            }
+          }
+        ]
+        delete where.timestamp
+      } else {
+        where.timestamp = {
+          gte: additionalStartDate,
+          lt: additionalEndDate
+        }
       }
     }
 
