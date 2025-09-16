@@ -33,6 +33,9 @@ export default function QrScanPage() {
   const [lastAttendance, setLastAttendance] = useState<any>(null)
   const [showQrScanner, setShowQrScanner] = useState(false)
   const [qrScanResult, setQrScanResult] = useState<string>('')
+  const [isQrScanned, setIsQrScanned] = useState(false)
+  const [scannedQrData, setScannedQrData] = useState<any>(null)
+  const [nextAttendanceType, setNextAttendanceType] = useState<'CHECK_IN' | 'CHECK_OUT'>('CHECK_IN')
 
   const checkAuthStatus = useCallback(async () => {
     try {
@@ -167,6 +170,53 @@ export default function QrScanPage() {
     setError('')
 
     try {
+      // QR 데이터 파싱
+      let parsedQrData
+      try {
+        parsedQrData = JSON.parse(qrData)
+      } catch (error) {
+        setError('잘못된 QR 코드입니다.')
+        return
+      }
+
+      // QR 코드 유효성 검증 (간단한 검증)
+      if (!parsedQrData.companyCode || !parsedQrData.qrCodeId) {
+        setError('유효하지 않은 QR 코드입니다.')
+        return
+      }
+
+      // 회사 코드 확인
+      if (parsedQrData.companyCode !== companyCode) {
+        setError('다른 회사의 QR 코드입니다.')
+        return
+      }
+
+      // 다음 출퇴근 타입 결정
+      const nextType = lastAttendance?.type === 'CHECK_IN' ? 'CHECK_OUT' : 'CHECK_IN'
+      setNextAttendanceType(nextType)
+      
+      // QR 스캔 성공 처리
+      setScannedQrData(parsedQrData)
+      setIsQrScanned(true)
+      setShowQrScanner(false)
+      
+      alert(`QR 코드가 인식되었습니다. ${nextType === 'CHECK_IN' ? '출근' : '퇴근'} 버튼을 눌러주세요.`)
+      
+    } catch (error) {
+      console.error('QR 스캔 에러:', error)
+      setError('QR 코드 스캔 중 오류가 발생했습니다.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleAttendance = async () => {
+    if (!scannedQrData) return
+    
+    setIsLoading(true)
+    setError('')
+
+    try {
       // GPS 위치 정보 가져오기
       let locationData = null
       if (navigator.geolocation) {
@@ -186,7 +236,6 @@ export default function QrScanPage() {
           }
         } catch (locationError) {
           console.warn('위치 정보를 가져올 수 없습니다:', locationError)
-          // 위치 정보가 없어도 계속 진행 (선택적)
         }
       }
 
@@ -202,7 +251,7 @@ export default function QrScanPage() {
         },
         credentials: 'include',
         body: JSON.stringify({
-          qrData: qrData,
+          qrData: JSON.stringify(scannedQrData),
           username: employee.username,
           location: locationData
         }),
@@ -211,14 +260,16 @@ export default function QrScanPage() {
       if (response.ok) {
         const data = await response.json()
         setLastAttendance(data.attendance)
+        setIsQrScanned(false)
+        setScannedQrData(null)
         alert(`${data.attendance.type === 'CHECK_IN' ? '출근' : '퇴근'}이 기록되었습니다!`)
       } else {
         const data = await response.json()
-        setError(data.message || 'QR 코드 스캔에 실패했습니다.')
+        setError(data.message || '출퇴근 기록에 실패했습니다.')
       }
     } catch (error) {
-      console.error('QR 스캔 에러:', error)
-      setError('QR 코드 스캔 중 오류가 발생했습니다.')
+      console.error('출퇴근 기록 에러:', error)
+      setError('출퇴근 기록 중 오류가 발생했습니다.')
     } finally {
       setIsLoading(false)
     }
@@ -436,40 +487,84 @@ export default function QrScanPage() {
           </div>
         </div>
 
-        {/* Attendance Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Check In */}
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
-            <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Clock className="h-8 w-8 text-green-600" />
+        {/* QR Scanned - Attendance Button */}
+        {isQrScanned && (
+          <div className="bg-white rounded-lg shadow-md p-8 mb-8">
+            <div className="text-center">
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                nextAttendanceType === 'CHECK_IN' ? 'bg-green-100' : 'bg-red-100'
+              }`}>
+                <CheckCircle className={`h-8 w-8 ${
+                  nextAttendanceType === 'CHECK_IN' ? 'text-green-600' : 'text-red-600'
+                }`} />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                QR 코드가 인식되었습니다!
+              </h3>
+              <p className="text-gray-600 mb-6">
+                {nextAttendanceType === 'CHECK_IN' ? '출근' : '퇴근'} 버튼을 눌러 출퇴근을 기록하세요
+              </p>
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={handleAttendance}
+                  disabled={isLoading}
+                  className={`px-8 py-3 rounded-lg font-medium text-white ${
+                    nextAttendanceType === 'CHECK_IN' 
+                      ? 'bg-green-600 hover:bg-green-700' 
+                      : 'bg-red-600 hover:bg-red-700'
+                  } disabled:bg-gray-400`}
+                >
+                  {isLoading ? '처리 중...' : `${nextAttendanceType === 'CHECK_IN' ? '출근' : '퇴근'}하기`}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsQrScanned(false)
+                    setScannedQrData(null)
+                    setQrScanResult('')
+                  }}
+                  className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  취소
+                </button>
+              </div>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">출근</h3>
-            <p className="text-gray-600 mb-6">출근 시간을 기록합니다</p>
-            <button
-              onClick={() => handleAttendance('CHECK_IN')}
-              disabled={isLoading || (lastAttendance && lastAttendance.type === 'CHECK_IN')}
-              className="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium disabled:bg-gray-400"
-            >
-              {isLoading ? '처리 중...' : '출근하기'}
-            </button>
           </div>
+        )}
 
-          {/* Check Out */}
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
-            <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Clock className="h-8 w-8 text-red-600" />
+        {/* Attendance Buttons - Only show when QR is not scanned */}
+        {!isQrScanned && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Check In */}
+            <div className="bg-white rounded-lg shadow-md p-8 text-center">
+              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="h-8 w-8 text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">출근</h3>
+              <p className="text-gray-600 mb-6">QR 코드를 먼저 스캔해주세요</p>
+              <button
+                disabled={true}
+                className="w-full bg-gray-400 text-white px-6 py-3 rounded-lg font-medium cursor-not-allowed"
+              >
+                QR 스캔 필요
+              </button>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">퇴근</h3>
-            <p className="text-gray-600 mb-6">퇴근 시간을 기록합니다</p>
-            <button
-              onClick={() => handleAttendance('CHECK_OUT')}
-              disabled={isLoading || (lastAttendance && lastAttendance.type === 'CHECK_OUT')}
-              className="w-full bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium disabled:bg-gray-400"
-            >
-              {isLoading ? '처리 중...' : '퇴근하기'}
-            </button>
+
+            {/* Check Out */}
+            <div className="bg-white rounded-lg shadow-md p-8 text-center">
+              <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="h-8 w-8 text-red-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">퇴근</h3>
+              <p className="text-gray-600 mb-6">QR 코드를 먼저 스캔해주세요</p>
+              <button
+                disabled={true}
+                className="w-full bg-gray-400 text-white px-6 py-3 rounded-lg font-medium cursor-not-allowed"
+              >
+                QR 스캔 필요
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Error Message */}
         {error && (

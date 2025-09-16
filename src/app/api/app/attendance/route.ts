@@ -136,17 +136,33 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 출퇴근 기록 생성
-    const attendance = await prisma.attendance.create({
-      data: {
-        type: attendanceType,
-        timestamp: new Date(),
-        location: qrCode.location || qrCode.name,
-        companyId: company.id,
-        employeeId: employee.id,
-        qrCodeId: qrCode.id
-      }
-    })
+    // 같은 타입의 중복 기록이 있는지 확인
+    const existingSameType = todayAttendances.find(att => att.type === attendanceType)
+    
+    let attendance
+    if (existingSameType) {
+      // 중복 기록이 있으면 기존 기록 업데이트
+      attendance = await prisma.attendance.update({
+        where: { id: existingSameType.id },
+        data: {
+          timestamp: new Date(),
+          location: qrCode.location || qrCode.name,
+          qrCodeId: qrCode.id
+        }
+      })
+    } else {
+      // 새로운 기록 생성
+      attendance = await prisma.attendance.create({
+        data: {
+          type: attendanceType,
+          timestamp: new Date(),
+          location: qrCode.location || qrCode.name,
+          companyId: company.id,
+          employeeId: employee.id,
+          qrCodeId: qrCode.id
+        }
+      })
+    }
 
     return NextResponse.json({
       message: `${attendanceType === 'CHECK_IN' ? '출근' : '퇴근'}이 기록되었습니다.`,

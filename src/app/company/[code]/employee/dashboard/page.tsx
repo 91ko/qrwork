@@ -196,10 +196,24 @@ export default function EmployeeDashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            안녕하세요, {employee.name}님!
-          </h1>
-          <p className="text-gray-600">개인 출퇴근 기록을 확인하세요</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                안녕하세요, {employee.name}님!
+              </h1>
+              <p className="text-gray-600">개인 출퇴근 기록을 확인하세요</p>
+            </div>
+            <button
+              onClick={() => loadAttendances()}
+              disabled={isLoading}
+              className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:bg-gray-400"
+            >
+              <svg className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              {isLoading ? '새로고침 중...' : '새로고침'}
+            </button>
+          </div>
         </div>
 
         {/* Stats Cards */}
