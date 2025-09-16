@@ -246,10 +246,10 @@ export default function EmployeeManagementPage() {
             <div className="flex items-center space-x-4">
               <Link
                 href={`/company/${companyCode}/admin/dashboard`}
-                className="flex items-center text-gray-600 hover:text-gray-900"
+                className="flex items-center text-blue-600 hover:text-blue-800"
               >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                대시보드
+                <QrCode className="h-4 w-4 mr-1" />
+                관리자 홈
               </Link>
               <button
                 onClick={() => {
@@ -569,19 +569,26 @@ export default function EmployeeManagementPage() {
                   <div className="border-t pt-6">
                     <h3 className="text-lg font-medium text-gray-900 mb-4">커스텀 필드</h3>
                     <div className="space-y-4">
-                      {customFields.map((field) => (
-                        <div key={field.id}>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            {field.name}
-                          </label>
-                          <input
-                            type="text"
-                            value={field.value}
-                            onChange={(e) => handleEditCustomFieldChange(field.id, e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                        </div>
-                      ))}
+                      {customFields.map((field) => {
+                        // 필드 객체가 유효한지 확인
+                        if (!field || typeof field !== 'object' || !field.id) {
+                          return null
+                        }
+                        
+                        return (
+                          <div key={field.id}>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              {field.name}
+                            </label>
+                            <input
+                              type="text"
+                              value={field.value}
+                              onChange={(e) => handleEditCustomFieldChange(field.id, e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 )}

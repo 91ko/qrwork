@@ -198,6 +198,13 @@ export default function NewEmployeePage() {
             </div>
             <div className="flex items-center space-x-4">
               <Link
+                href={`/company/${companyCode}/admin/dashboard`}
+                className="flex items-center text-blue-600 hover:text-blue-800"
+              >
+                <QrCode className="h-4 w-4 mr-1" />
+                관리자 홈
+              </Link>
+              <Link
                 href={`/company/${companyCode}/admin/employees`}
                 className="flex items-center text-gray-600 hover:text-gray-900"
               >
@@ -427,7 +434,13 @@ export default function NewEmployeePage() {
               )}
 
               {/* 추가된 커스텀 필드들 */}
-              {customFields.map((field) => (
+              {customFields.map((field) => {
+                // 필드 객체가 유효한지 확인
+                if (!field || typeof field !== 'object' || !field.id) {
+                  return null
+                }
+                
+                return (
                 <div key={field.id} className="mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <label className="block text-sm font-medium text-gray-700">
