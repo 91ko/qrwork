@@ -133,7 +133,9 @@ export async function GET(request: NextRequest) {
             select: {
               id: true,
               name: true,
-              username: true
+              username: true,
+              phone: true,
+              customFields: true
             }
           },
           qrCode: {

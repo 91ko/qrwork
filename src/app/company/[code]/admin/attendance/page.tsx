@@ -27,11 +27,25 @@ interface AttendanceRecord {
     id: string
     name: string
     username: string
+    customFields?: string
   }
   qrCode?: {
     name: string
     location: string
   }
+}
+
+interface AttendanceSummary {
+  employee: {
+    id: string
+    name: string
+    username: string
+    customFields?: string
+  }
+  date: string
+  checkIn?: AttendanceRecord
+  checkOut?: AttendanceRecord
+  totalHours?: number
 }
 
 export default function AttendanceRecordsPage() {
@@ -40,6 +54,7 @@ export default function AttendanceRecordsPage() {
   const companyCode = params.code as string
   
   const [attendances, setAttendances] = useState<AttendanceRecord[]>([])
+  const [attendanceSummaries, setAttendanceSummaries] = useState<AttendanceSummary[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -50,7 +65,51 @@ export default function AttendanceRecordsPage() {
   const [viewMode, setViewMode] = useState<'monthly' | 'daily'>('monthly')
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)) // YYYY-MM 형식
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]) // YYYY-MM-DD 형식
+  const [showCustomFields, setShowCustomFields] = useState<string[]>([]) // 표시할 커스텀 필드들
   const itemsPerPage = 20
+
+  // 출퇴근 기록을 날짜별로 그룹화하는 함수
+  const groupAttendancesByDate = (attendances: AttendanceRecord[]): AttendanceSummary[] => {
+    const grouped = new Map<string, AttendanceSummary>()
+
+    attendances.forEach(attendance => {
+      const date = new Date(attendance.timestamp).toISOString().split('T')[0]
+      const key = `${attendance.employee.id}-${date}`
+
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          employee: attendance.employee,
+          date: date,
+          checkIn: undefined,
+          checkOut: undefined,
+          totalHours: 0
+        })
+      }
+
+      const summary = grouped.get(key)!
+      if (attendance.type === 'CHECK_IN') {
+        summary.checkIn = attendance
+      } else if (attendance.type === 'CHECK_OUT') {
+        summary.checkOut = attendance
+      }
+
+      // 근무 시간 계산
+      if (summary.checkIn && summary.checkOut) {
+        const checkInTime = new Date(summary.checkIn.timestamp)
+        const checkOutTime = new Date(summary.checkOut.timestamp)
+        const diffMs = checkOutTime.getTime() - checkInTime.getTime()
+        summary.totalHours = Math.round(diffMs / (1000 * 60 * 60) * 10) / 10 // 소수점 1자리
+      }
+    })
+
+    return Array.from(grouped.values()).sort((a, b) => {
+      // 날짜 내림차순, 직원명 오름차순
+      if (a.date !== b.date) {
+        return new Date(b.date).getTime() - new Date(a.date).getTime()
+      }
+      return a.employee.name.localeCompare(b.employee.name)
+    })
+  }
 
   const loadAttendances = useCallback(async (page = 1) => {
     try {
@@ -81,6 +140,9 @@ export default function AttendanceRecordsPage() {
       if (response.ok) {
         const data = await response.json()
         setAttendances(data.attendances)
+        // 출퇴근 기록을 날짜별로 그룹화
+        const summaries = groupAttendancesByDate(data.attendances)
+        setAttendanceSummaries(summaries)
         setTotalPages(Math.ceil(data.total / itemsPerPage))
         setCurrentPage(page)
       } else {
@@ -307,6 +369,73 @@ export default function AttendanceRecordsPage() {
           </div>
         </div>
 
+        {/* Custom Fields Settings */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">표시할 정보 선택</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={showCustomFields.includes('department')}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setShowCustomFields([...showCustomFields, 'department'])
+                  } else {
+                    setShowCustomFields(showCustomFields.filter(field => field !== 'department'))
+                  }
+                }}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2"
+              />
+              <span className="text-sm text-gray-700">부서</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={showCustomFields.includes('position')}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setShowCustomFields([...showCustomFields, 'position'])
+                  } else {
+                    setShowCustomFields(showCustomFields.filter(field => field !== 'position'))
+                  }
+                }}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2"
+              />
+              <span className="text-sm text-gray-700">직급</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={showCustomFields.includes('employeeId')}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setShowCustomFields([...showCustomFields, 'employeeId'])
+                  } else {
+                    setShowCustomFields(showCustomFields.filter(field => field !== 'employeeId'))
+                  }
+                }}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2"
+              />
+              <span className="text-sm text-gray-700">사번</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={showCustomFields.includes('phone')}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setShowCustomFields([...showCustomFields, 'phone'])
+                  } else {
+                    setShowCustomFields(showCustomFields.filter(field => field !== 'phone'))
+                  }
+                }}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2"
+              />
+              <span className="text-sm text-gray-700">전화번호</span>
+            </label>
+          </div>
+        </div>
+
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -388,64 +517,128 @@ export default function AttendanceRecordsPage() {
                     직원 정보
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    타입
+                    날짜
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    시간
+                    출근
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    위치
+                    퇴근
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    QR 코드
+                    근무시간
                   </th>
+                  {showCustomFields.includes('department') && (
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      부서
+                    </th>
+                  )}
+                  {showCustomFields.includes('position') && (
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      직급
+                    </th>
+                  )}
+                  {showCustomFields.includes('employeeId') && (
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      사번
+                    </th>
+                  )}
+                  {showCustomFields.includes('phone') && (
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      전화번호
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {attendances.length === 0 ? (
+                {attendanceSummaries.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan={5 + showCustomFields.length} className="px-6 py-12 text-center text-gray-500">
                       {searchTerm || dateFilter || typeFilter !== 'ALL' 
                         ? '검색 결과가 없습니다.' 
                         : '출퇴근 기록이 없습니다.'}
                     </td>
                   </tr>
                 ) : (
-                  attendances.map((attendance) => (
-                    <tr key={attendance.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{attendance.employee.name}</div>
-                          <div className="text-sm text-gray-500">@{attendance.employee.username}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          attendance.type === 'CHECK_IN' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {attendance.type === 'CHECK_IN' ? '출근' : '퇴근'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(attendance.timestamp).toLocaleString('ko-KR')}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {attendance.location || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {attendance.qrCode ? (
+                  attendanceSummaries.map((summary) => {
+                    const customFields = summary.employee.customFields ? JSON.parse(summary.employee.customFields) : {}
+                    return (
+                      <tr key={`${summary.employee.id}-${summary.date}`} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <div>
-                            <div className="text-sm text-gray-900">{attendance.qrCode.name}</div>
-                            <div className="text-xs text-gray-500">{attendance.qrCode.location}</div>
+                            <div className="text-sm font-medium text-gray-900">{summary.employee.name}</div>
+                            <div className="text-sm text-gray-500">@{summary.employee.username}</div>
                           </div>
-                        ) : (
-                          <span className="text-gray-400">직접 기록</span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {new Date(summary.date).toLocaleDateString('ko-KR')}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {summary.checkIn ? (
+                            <div>
+                              <div className="text-sm text-gray-900">
+                                {new Date(summary.checkIn.timestamp).toLocaleTimeString('ko-KR', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit' 
+                                })}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {summary.checkIn.location || '-'}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 text-sm">미기록</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {summary.checkOut ? (
+                            <div>
+                              <div className="text-sm text-gray-900">
+                                {new Date(summary.checkOut.timestamp).toLocaleTimeString('ko-KR', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit' 
+                                })}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {summary.checkOut.location || '-'}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 text-sm">미기록</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {summary.totalHours && summary.totalHours > 0 ? (
+                            <span className="text-sm font-medium text-gray-900">
+                              {summary.totalHours}시간
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 text-sm">-</span>
+                          )}
+                        </td>
+                        {showCustomFields.includes('department') && (
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {customFields.department || '-'}
+                          </td>
                         )}
-                      </td>
-                    </tr>
-                  ))
+                        {showCustomFields.includes('position') && (
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {customFields.position || '-'}
+                          </td>
+                        )}
+                        {showCustomFields.includes('employeeId') && (
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {customFields.employeeId || '-'}
+                          </td>
+                        )}
+                        {showCustomFields.includes('phone') && (
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {summary.employee.phone || '-'}
+                          </td>
+                        )}
+                      </tr>
+                    )
+                  })
                 )}
               </tbody>
             </table>
@@ -541,3 +734,4 @@ export default function AttendanceRecordsPage() {
     </div>
   )
 }
+

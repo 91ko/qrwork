@@ -129,7 +129,8 @@ export async function GET(request: NextRequest) {
             name: true,
             username: true,
             email: true,
-            phone: true
+            phone: true,
+            customFields: true
           }
         },
         qrCode: {
@@ -144,30 +145,82 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // CSV 형식으로 데이터 변환
+    // 출퇴근 기록을 날짜별로 그룹화
+    const grouped = new Map<string, any>()
+    
+    attendances.forEach(attendance => {
+      const date = new Date(attendance.timestamp).toISOString().split('T')[0]
+      const key = `${attendance.employee.id}-${date}`
+      
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          employee: attendance.employee,
+          date: date,
+          checkIn: null,
+          checkOut: null,
+          totalHours: 0
+        })
+      }
+      
+      const summary = grouped.get(key)
+      if (attendance.type === 'CHECK_IN') {
+        summary.checkIn = attendance
+      } else if (attendance.type === 'CHECK_OUT') {
+        summary.checkOut = attendance
+      }
+      
+      // 근무 시간 계산
+      if (summary.checkIn && summary.checkOut) {
+        const checkInTime = new Date(summary.checkIn.timestamp)
+        const checkOutTime = new Date(summary.checkOut.timestamp)
+        const diffMs = checkOutTime.getTime() - checkInTime.getTime()
+        summary.totalHours = Math.round(diffMs / (1000 * 60 * 60) * 10) / 10
+      }
+    })
+
+    const summaries = Array.from(grouped.values()).sort((a, b) => {
+      if (a.date !== b.date) {
+        return new Date(b.date).getTime() - new Date(a.date).getTime()
+      }
+      return a.employee.name.localeCompare(b.employee.name)
+    })
+
+    // CSV 형식으로 데이터 변환 (한 줄로)
     const csvHeaders = [
       '직원명',
       '사용자명',
       '이메일',
       '전화번호',
-      '타입',
-      '시간',
-      '위치',
-      'QR코드명',
-      'QR코드위치'
+      '날짜',
+      '출근시간',
+      '출근위치',
+      '퇴근시간',
+      '퇴근위치',
+      '근무시간',
+      '부서',
+      '직급',
+      '사번'
     ]
 
-    const csvRows = attendances.map(attendance => [
-      attendance.employee.name,
-      attendance.employee.username,
-      attendance.employee.email || '',
-      attendance.employee.phone || '',
-      attendance.type === 'CHECK_IN' ? '출근' : '퇴근',
-      new Date(attendance.timestamp).toLocaleString('ko-KR'),
-      attendance.location || '',
-      attendance.qrCode?.name || '직접 기록',
-      attendance.qrCode?.location || ''
-    ])
+    const csvRows = summaries.map(summary => {
+      const customFields = summary.employee.customFields ? JSON.parse(summary.employee.customFields) : {}
+      
+      return [
+        summary.employee.name,
+        summary.employee.username,
+        summary.employee.email || '',
+        summary.employee.phone || '',
+        new Date(summary.date).toLocaleDateString('ko-KR'),
+        summary.checkIn ? new Date(summary.checkIn.timestamp).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '미기록',
+        summary.checkIn ? (summary.checkIn.location || '') : '',
+        summary.checkOut ? new Date(summary.checkOut.timestamp).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '미기록',
+        summary.checkOut ? (summary.checkOut.location || '') : '',
+        summary.totalHours > 0 ? `${summary.totalHours}시간` : '',
+        customFields.department || '',
+        customFields.position || '',
+        customFields.employeeId || ''
+      ]
+    })
 
     // CSV 데이터 생성
     const csvContent = [
