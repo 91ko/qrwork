@@ -54,30 +54,6 @@ export default function StatisticsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState('month')
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7))
 
-  const checkAuthStatus = useCallback(async () => {
-    try {
-      const response = await fetch('/api/auth/me', {
-        method: 'GET',
-        credentials: 'include'
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (data.company.code === companyCode) {
-          setIsAuthenticated(true)
-          loadStatistics()
-        } else {
-          router.push('/auth/login')
-        }
-      } else {
-        router.push('/auth/login')
-      }
-    } catch (error) {
-      console.error('인증 확인 에러:', error)
-      router.push('/auth/login')
-    }
-  }, [companyCode, router, loadStatistics])
-
   const loadStatistics = useCallback(async () => {
     try {
       setIsLoading(true)
@@ -103,6 +79,30 @@ export default function StatisticsPage() {
       setIsLoading(false)
     }
   }, [selectedPeriod, selectedMonth])
+
+  const checkAuthStatus = useCallback(async () => {
+    try {
+      const response = await fetch('/api/auth/me', {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.company.code === companyCode) {
+          setIsAuthenticated(true)
+          loadStatistics()
+        } else {
+          router.push('/auth/login')
+        }
+      } else {
+        router.push('/auth/login')
+      }
+    } catch (error) {
+      console.error('인증 확인 에러:', error)
+      router.push('/auth/login')
+    }
+  }, [companyCode, router, loadStatistics])
 
   const handleLogout = async () => {
     try {

@@ -212,7 +212,7 @@ export default function SuperAdminDashboard() {
     if (activeTab === 'inquiries') {
       loadInquiries()
     }
-  }, [activeTab])
+  }, [activeTab, loadInquiries])
 
   const handleApproveCompany = async (companyId: string, action: string) => {
     try {
