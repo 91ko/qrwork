@@ -824,7 +824,7 @@ export default function SuperAdminDashboard() {
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">이름</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">이메일</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">마지막 로그인</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">등록일</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
@@ -844,7 +844,7 @@ export default function SuperAdminDashboard() {
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {admin.lastLoginAt ? new Date(admin.lastLoginAt).toLocaleDateString('ko-KR') : '없음'}
+                              {new Date(admin.createdAt).toLocaleDateString('ko-KR')}
                             </td>
                           </tr>
                         ))}

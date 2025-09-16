@@ -30,8 +30,7 @@ export async function GET(
             name: true,
             email: true,
             isActive: true,
-            createdAt: true,
-            lastLoginAt: true
+            createdAt: true
           }
         },
         employees: {
@@ -42,8 +41,7 @@ export async function GET(
             email: true,
             phone: true,
             isActive: true,
-            createdAt: true,
-            lastLoginAt: true
+            createdAt: true
           }
         },
         qrCodes: {
@@ -143,16 +141,11 @@ export async function GET(
       }
     })
 
-    // 활성 직원 수 (최근 7일 내 로그인)
-    const sevenDaysAgo = new Date()
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-
+    // 활성 직원 수 (현재 활성 상태인 직원)
     const activeEmployees = await prisma.employee.count({
       where: {
         companyId: id,
-        lastLoginAt: {
-          gte: sevenDaysAgo
-        }
+        isActive: true
       }
     })
 
