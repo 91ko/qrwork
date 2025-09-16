@@ -10,6 +10,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// 구독 플랜 모델
+model SubscriptionPlan {
+  id          String   @id @default(cuid())
+  name        String   // 플랜명 (예: "기본", "프리미엄", "엔터프라이즈")
+  description String?  // 플랜 설명
+  price       Int      // 월 가격 (원)
+  maxEmployees Int     // 최대 직원 수
+  features    String?  // 포함 기능 (JSON)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 관계
+  subscriptions CompanySubscription[]
+
+  @@map("subscription_plans")
+}
+
 // 회사 모델
 model Company {
   id            String   @id @default(cuid())
@@ -33,8 +51,53 @@ model Company {
   settings      CompanySettings?
   leaveRequests LeaveRequest[]
   employeeLeaves EmployeeLeave[]
+  subscriptions CompanySubscription[]
+  payments      Payment[]
 
   @@map("companies")
+}
+
+// 회사 구독 모델
+model CompanySubscription {
+  id                String   @id @default(cuid())
+  startDate         DateTime // 구독 시작일
+  endDate           DateTime // 구독 종료일
+  status            String   @default("ACTIVE") // ACTIVE, EXPIRED, CANCELLED, SUSPENDED
+  autoRenew         Boolean  @default(true) // 자동 갱신 여부
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // 관계
+  companyId         String
+  company           Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  planId            String
+  plan              SubscriptionPlan @relation(fields: [planId], references: [id])
+  payments          Payment[]
+
+  @@map("company_subscriptions")
+}
+
+// 결제 모델
+model Payment {
+  id              String   @id @default(cuid())
+  amount          Int      // 결제 금액 (원)
+  status          String   // PENDING, COMPLETED, FAILED, CANCELLED, REFUNDED
+  paymentMethod   String?  // 결제 수단 (CARD, BANK_TRANSFER, KAKAO_PAY, TOSS_PAY 등)
+  paymentId       String?  // 외부 결제 시스템 ID
+  transactionId   String?  // 거래 ID
+  description     String?  // 결제 설명
+  metadata        String?  // 추가 메타데이터 (JSON)
+  paidAt          DateTime? // 결제 완료일
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // 관계
+  companyId       String
+  company         Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  subscriptionId  String?
+  subscription    CompanySubscription? @relation(fields: [subscriptionId], references: [id])
+
+  @@map("payments")
 }
 
 // 최종 관리자 모델

@@ -62,6 +62,15 @@ export default function SuperAdminDashboard() {
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([])
   const [showCompanyDetails, setShowCompanyDetails] = useState<string | null>(null)
   const [companyDetails, setCompanyDetails] = useState<any>(null)
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState<string | null>(null)
+  const [subscriptionData, setSubscriptionData] = useState({
+    endDate: '',
+    maxEmployees: 10,
+    status: 'ACTIVE'
+  })
+  const [subscriptionPlans, setSubscriptionPlans] = useState<any[]>([])
+  const [selectedPlan, setSelectedPlan] = useState('')
+  const [extendMonths, setExtendMonths] = useState(1)
 
   const loadDashboardData = useCallback(async (page = 1) => {
     try {
@@ -108,6 +117,21 @@ export default function SuperAdminDashboard() {
     }
   }, [searchTerm, statusFilter])
 
+  const loadSubscriptionPlans = useCallback(async () => {
+    try {
+      const response = await fetch('/api/super-admin/subscription-plans', {
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setSubscriptionPlans(data.plans)
+      }
+    } catch (error) {
+      console.error('구독 플랜 로드 에러:', error)
+    }
+  }, [])
+
   const checkAuthStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/super-admin/me', {
@@ -129,7 +153,8 @@ export default function SuperAdminDashboard() {
 
   useEffect(() => {
     checkAuthStatus()
-  }, [checkAuthStatus])
+    loadSubscriptionPlans()
+  }, [checkAuthStatus, loadSubscriptionPlans])
 
   const handleApproveCompany = async (companyId: string, action: string) => {
     try {
@@ -336,6 +361,93 @@ export default function SuperAdminDashboard() {
     } catch (error) {
       console.error('회사 상세 정보 조회 에러:', error)
       alert('회사 상세 정보 조회 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleOpenSubscriptionModal = (companyId: string) => {
+    setShowSubscriptionModal(companyId)
+    setSelectedPlan('')
+    setExtendMonths(1)
+    setSubscriptionData({
+      endDate: '',
+      maxEmployees: 10,
+      status: 'ACTIVE'
+    })
+  }
+
+  const handleCreateSubscription = async (companyId: string) => {
+    if (!selectedPlan) {
+      alert('구독 플랜을 선택해주세요.')
+      return
+    }
+
+    if (!subscriptionData.endDate) {
+      alert('구독 종료일을 입력해주세요.')
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/super-admin/companies/${companyId}/subscription`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          planId: selectedPlan,
+          startDate: new Date().toISOString().split('T')[0],
+          endDate: subscriptionData.endDate,
+          autoRenew: true,
+          paymentAmount: subscriptionPlans.find(p => p.id === selectedPlan)?.price,
+          paymentMethod: 'MANUAL',
+          description: '관리자 수동 구독 설정'
+        })
+      })
+
+      if (response.ok) {
+        alert('구독이 성공적으로 설정되었습니다!')
+        setShowSubscriptionModal(null)
+        loadDashboardData(currentPage)
+      } else {
+        const data = await response.json()
+        alert(data.message || '구독 설정에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('구독 설정 에러:', error)
+      alert('구독 설정 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleExtendSubscription = async (companyId: string) => {
+    if (!extendMonths || extendMonths < 1) {
+      alert('연장할 개월 수를 입력해주세요.')
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/super-admin/companies/${companyId}/subscription`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          extendMonths: parseInt(extendMonths.toString()),
+          paymentMethod: 'MANUAL'
+        })
+      })
+
+      if (response.ok) {
+        alert(`구독이 ${extendMonths}개월 연장되었습니다!`)
+        setShowSubscriptionModal(null)
+        loadDashboardData(currentPage)
+      } else {
+        const data = await response.json()
+        alert(data.message || '구독 연장에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('구독 연장 에러:', error)
+      alert('구독 연장 중 오류가 발생했습니다.')
     }
   }
 
@@ -658,6 +770,12 @@ export default function SuperAdminDashboard() {
                           >
                             상세
                           </button>
+                          <button
+                            onClick={() => handleOpenSubscriptionModal(company.id)}
+                            className="text-purple-600 hover:text-purple-900 text-xs bg-purple-50 px-2 py-1 rounded"
+                          >
+                            구독관리
+                          </button>
                           {!company.isApproved ? (
                             <>
                               <button
@@ -889,6 +1007,98 @@ export default function SuperAdminDashboard() {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Subscription Management Modal */}
+        {showSubscriptionModal && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+              <div className="mt-3">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    구독 관리
+                  </h3>
+                  <button
+                    onClick={() => setShowSubscriptionModal(null)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  {/* 구독 플랜 선택 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      구독 플랜 선택
+                    </label>
+                    <select
+                      value={selectedPlan}
+                      onChange={(e) => setSelectedPlan(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">플랜을 선택하세요</option>
+                      {subscriptionPlans.map((plan) => (
+                        <option key={plan.id} value={plan.id}>
+                          {plan.name} - {plan.price.toLocaleString()}원/월 (최대 {plan.maxEmployees}명)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* 구독 종료일 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      구독 종료일
+                    </label>
+                    <input
+                      type="date"
+                      value={subscriptionData.endDate}
+                      onChange={(e) => setSubscriptionData({...subscriptionData, endDate: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* 구독 연장 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      구독 연장 (개월)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="12"
+                      value={extendMonths}
+                      onChange={(e) => setExtendMonths(parseInt(e.target.value) || 1)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* 버튼들 */}
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => setShowSubscriptionModal(null)}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                    >
+                      취소
+                    </button>
+                    <button
+                      onClick={() => handleExtendSubscription(showSubscriptionModal)}
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                    >
+                      {extendMonths}개월 연장
+                    </button>
+                    <button
+                      onClick={() => handleCreateSubscription(showSubscriptionModal)}
+                      className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md"
+                    >
+                      새 구독 설정
+                    </button>
                   </div>
                 </div>
               </div>
