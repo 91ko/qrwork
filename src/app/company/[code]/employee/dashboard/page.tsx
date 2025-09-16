@@ -50,6 +50,29 @@ export default function EmployeeDashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
 
+  const loadAttendances = useCallback(async (date?: string) => {
+    try {
+      setIsLoading(true)
+      const targetDate = date || selectedDate
+      
+      const response = await fetch(`/api/employee/attendance?date=${targetDate}`, {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setAttendances(data.attendances || [])
+      } else {
+        console.error('출퇴근 기록 조회 실패')
+      }
+    } catch (error) {
+      console.error('출퇴근 기록 조회 에러:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [selectedDate])
+
   const checkAuthStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/employee/auth/me', {
@@ -74,29 +97,6 @@ export default function EmployeeDashboardPage() {
       router.push(`/company/${companyCode}/scan`)
     }
   }, [companyCode, router, loadAttendances])
-
-  const loadAttendances = useCallback(async (date?: string) => {
-    try {
-      setIsLoading(true)
-      const targetDate = date || selectedDate
-      
-      const response = await fetch(`/api/employee/attendance?date=${targetDate}`, {
-        method: 'GET',
-        credentials: 'include'
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setAttendances(data.attendances || [])
-      } else {
-        console.error('출퇴근 기록 조회 실패')
-      }
-    } catch (error) {
-      console.error('출퇴근 기록 조회 에러:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [selectedDate])
 
   const handleDateChange = (date: string) => {
     setSelectedDate(date)

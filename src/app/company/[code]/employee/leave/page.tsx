@@ -65,45 +65,6 @@ export default function EmployeeLeavePage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const checkAuthStatus = useCallback(async () => {
-    try {
-      const response = await fetch('/api/employee/auth/me', {
-        method: 'GET',
-        credentials: 'include'
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (data.employee.company.code === companyCode) {
-          setIsAuthenticated(true)
-          setEmployee(data.employee)
-          loadData()
-        } else {
-          router.push(`/company/${companyCode}/scan`)
-        }
-      } else {
-        router.push(`/company/${companyCode}/scan`)
-      }
-    } catch (error) {
-      console.error('인증 확인 에러:', error)
-      router.push(`/company/${companyCode}/scan`)
-    }
-  }, [companyCode, router, loadData])
-
-  const loadData = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      await Promise.all([
-        loadLeaveInfo(),
-        loadLeaveRequests()
-      ])
-    } catch (error) {
-      console.error('데이터 로드 에러:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [loadLeaveInfo, loadLeaveRequests])
-
   const loadLeaveInfo = useCallback(async () => {
     try {
       const response = await fetch('/api/employee/leave/info', {
@@ -135,6 +96,45 @@ export default function EmployeeLeavePage() {
       console.error('휴가 신청 조회 에러:', error)
     }
   }, [])
+
+  const loadData = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      await Promise.all([
+        loadLeaveInfo(),
+        loadLeaveRequests()
+      ])
+    } catch (error) {
+      console.error('데이터 로드 에러:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [loadLeaveInfo, loadLeaveRequests])
+
+  const checkAuthStatus = useCallback(async () => {
+    try {
+      const response = await fetch('/api/employee/auth/me', {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.employee.company.code === companyCode) {
+          setIsAuthenticated(true)
+          setEmployee(data.employee)
+          loadData()
+        } else {
+          router.push(`/company/${companyCode}/scan`)
+        }
+      } else {
+        router.push(`/company/${companyCode}/scan`)
+      }
+    } catch (error) {
+      console.error('인증 확인 에러:', error)
+      router.push(`/company/${companyCode}/scan`)
+    }
+  }, [companyCode, router, loadData])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
