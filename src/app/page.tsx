@@ -1,35 +1,13 @@
 import Link from 'next/link'
 import { ArrowRight, QrCode, Users, Clock, TrendingUp } from 'lucide-react'
 import EmployeeLoginForm from '@/components/EmployeeLoginForm'
+import Header from '@/components/Header'
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <QrCode className="h-8 w-8 text-blue-600" />
-              <span className="ml-2 text-2xl font-bold text-gray-900">QR워크</span>
-            </div>
-            <div className="flex space-x-4">
-              <Link
-                href="/auth/login"
-                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                로그인
-              </Link>
-              <Link
-                href="/auth/register"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                무료 체험 시작
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <main>
@@ -64,7 +42,9 @@ export default function HomePage() {
         </div>
 
         {/* Employee Login Section */}
-        <EmployeeLoginForm />
+        <div id="employee-login">
+          <EmployeeLoginForm />
+        </div>
 
         {/* Features Section */}
         <section id="features" className="py-20 bg-white">
