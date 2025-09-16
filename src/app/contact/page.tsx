@@ -327,15 +327,15 @@ export default function ContactPage() {
 
           {/* 연락처 정보 */}
           <div className="mt-12 pt-8 border-t border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">기타 연락 방법</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">운영 정보</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-medium text-gray-900 mb-2">이메일</h4>
-                <p className="text-gray-600">support@qrwork.co.kr</p>
-              </div>
               <div>
                 <h4 className="font-medium text-gray-900 mb-2">운영 시간</h4>
                 <p className="text-gray-600">평일 09:00 - 18:00 (주말 및 공휴일 제외)</p>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">답변 시간</h4>
+                <p className="text-gray-600">문의 접수 후 1-2 영업일 내 답변</p>
               </div>
             </div>
           </div>
