@@ -4,10 +4,6 @@ import Link from 'next/link'
 import { QrCode } from 'lucide-react'
 
 export default function Header() {
-  const scrollToEmployeeLogin = () => {
-    const element = document.getElementById('employee-login')
-    element?.scrollIntoView({ behavior: 'smooth' })
-  }
 
   return (
     <header className="bg-white shadow-sm">
@@ -24,12 +20,12 @@ export default function Header() {
             >
               관리자 로그인
             </Link>
-            <button
-              onClick={scrollToEmployeeLogin}
+            <Link
+              href="/employee/login"
               className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
             >
               직원 로그인
-            </button>
+            </Link>
             <Link
               href="/auth/register"
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"

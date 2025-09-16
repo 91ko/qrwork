@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { ArrowRight, QrCode, Users, Clock, TrendingUp } from 'lucide-react'
-import EmployeeLoginForm from '@/components/EmployeeLoginForm'
 import Header from '@/components/Header'
 
 export default function HomePage() {
@@ -41,10 +40,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Employee Login Section */}
-        <div id="employee-login">
-          <EmployeeLoginForm />
-        </div>
 
         {/* Features Section */}
         <section id="features" className="py-20 bg-white">
