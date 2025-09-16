@@ -221,6 +221,32 @@ export default function RegisterPage() {
                   )}
                 </button>
               </div>
+              {/* 비밀번호 요구사항 */}
+              <div className="mt-2 text-sm text-gray-600">
+                <p className="font-medium mb-1">비밀번호 요구사항:</p>
+                <ul className="space-y-1 text-xs">
+                  <li className="flex items-center">
+                    <span className={`w-2 h-2 rounded-full mr-2 ${formData.password.length >= 8 ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                    최소 8자 이상
+                  </li>
+                  <li className="flex items-center">
+                    <span className={`w-2 h-2 rounded-full mr-2 ${/[A-Z]/.test(formData.password) ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                    대문자 포함
+                  </li>
+                  <li className="flex items-center">
+                    <span className={`w-2 h-2 rounded-full mr-2 ${/[a-z]/.test(formData.password) ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                    소문자 포함
+                  </li>
+                  <li className="flex items-center">
+                    <span className={`w-2 h-2 rounded-full mr-2 ${/[0-9]/.test(formData.password) ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                    숫자 포함
+                  </li>
+                  <li className="flex items-center">
+                    <span className={`w-2 h-2 rounded-full mr-2 ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                    특수문자 포함
+                  </li>
+                </ul>
+              </div>
             </div>
 
             {/* Confirm Password */}
