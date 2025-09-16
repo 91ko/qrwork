@@ -1,6 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, sanitizeLogData } from './security'
 
+// CORS 헤더 설정
+export function setCorsHeaders(response: NextResponse, request: NextRequest): NextResponse {
+  const origin = request.headers.get('origin')
+  
+  if (origin) {
+    response.headers.set('Access-Control-Allow-Origin', origin)
+  } else {
+    response.headers.set('Access-Control-Allow-Origin', '*')
+  }
+  
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+  response.headers.set('Access-Control-Allow-Credentials', 'true')
+  response.headers.set('Access-Control-Max-Age', '86400')
+  
+  return response
+}
+
 // 보안 헤더 설정
 export function setSecurityHeaders(response: NextResponse): NextResponse {
   // XSS 방지
@@ -119,9 +137,15 @@ export function corsMiddleware(request: NextRequest): NextResponse | null {
   const origin = request.headers.get('origin')
   const allowedOrigins = [
     'http://localhost:3000',
+    'http://127.0.0.1:3000',
     'https://your-domain.vercel.app', // 실제 도메인으로 변경
     process.env.NEXT_PUBLIC_BASE_URL
   ].filter(Boolean)
+  
+  // 개발 환경에서는 모든 origin 허용
+  if (process.env.NODE_ENV === 'development') {
+    return null
+  }
   
   if (origin && !allowedOrigins.includes(origin)) {
     console.warn(`CORS violation: ${origin}`, {

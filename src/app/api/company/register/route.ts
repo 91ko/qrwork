@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { getPrismaClient } from '@/lib/db-security'
 import { sanitizeInput, validateEmail, validatePassword } from '@/lib/security'
-import { securityMiddleware, setSecurityHeaders, errorHandlingMiddleware } from '@/lib/security-middleware'
+import { securityMiddleware, setSecurityHeaders, setCorsHeaders, errorHandlingMiddleware } from '@/lib/security-middleware'
 import { logger } from '@/lib/logger'
 
 // Prisma 클라이언트 인스턴스 생성
@@ -16,6 +16,12 @@ function generateCompanyCode(): string {
     result += chars.charAt(Math.floor(Math.random() * chars.length))
   }
   return result
+}
+
+// OPTIONS 요청 처리 (CORS preflight)
+export async function OPTIONS(request: NextRequest) {
+  const response = new NextResponse(null, { status: 200 })
+  return setCorsHeaders(setSecurityHeaders(response), request)
 }
 
 export async function POST(request: NextRequest) {
@@ -57,45 +63,50 @@ export async function POST(request: NextRequest) {
     // 유효성 검사
     if (!sanitizedData.companyName || !sanitizedData.adminName || !sanitizedData.email || !sanitizedData.password) {
       logger.warn('필수 필드 누락', { requestId, sanitizedData })
-      return NextResponse.json(
+      const response = NextResponse.json(
         { message: '필수 정보를 모두 입력해주세요.' },
         { status: 400 }
       )
+      return setCorsHeaders(setSecurityHeaders(response), request)
     }
 
     // 이메일 형식 검증
     if (!validateEmail(sanitizedData.email)) {
       logger.warn('잘못된 이메일 형식', { requestId, email: sanitizedData.email })
-      return NextResponse.json(
+      const response = NextResponse.json(
         { message: '올바른 이메일 형식을 입력해주세요.' },
         { status: 400 }
       )
+      return setCorsHeaders(setSecurityHeaders(response), request)
     }
 
     // 비밀번호 강도 검증
     const passwordValidation = validatePassword(sanitizedData.password)
     if (!passwordValidation.isValid) {
       logger.warn('약한 비밀번호', { requestId, errors: passwordValidation.errors })
-      return NextResponse.json(
+      const response = NextResponse.json(
         { message: '비밀번호 요구사항을 만족하지 않습니다.', errors: passwordValidation.errors },
         { status: 400 }
       )
+      return setCorsHeaders(setSecurityHeaders(response), request)
     }
 
     if (sanitizedData.password !== sanitizedData.confirmPassword) {
       logger.warn('비밀번호 불일치', { requestId })
-      return NextResponse.json(
+      const response = NextResponse.json(
         { message: '비밀번호가 일치하지 않습니다.' },
         { status: 400 }
       )
+      return setCorsHeaders(setSecurityHeaders(response), request)
     }
 
     if (!sanitizedData.agreeTerms) {
       logger.warn('이용약관 미동의', { requestId })
-      return NextResponse.json(
+      const response = NextResponse.json(
         { message: '이용약관에 동의해주세요.' },
         { status: 400 }
       )
+      return setCorsHeaders(setSecurityHeaders(response), request)
     }
 
     // 데이터베이스 연결 테스트
@@ -111,10 +122,11 @@ export async function POST(request: NextRequest) {
     console.log('이메일 중복 확인 완료:', existingAdmin ? '중복됨' : '사용 가능')
 
     if (existingAdmin) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { message: '이미 사용 중인 이메일입니다.' },
         { status: 400 }
       )
+      return setCorsHeaders(setSecurityHeaders(response), request)
     }
 
     // 회사 코드 생성 (중복 확인)
@@ -135,10 +147,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (!isUnique) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { message: '회사 코드 생성에 실패했습니다. 다시 시도해주세요.' },
         { status: 500 }
       )
+      return setCorsHeaders(setSecurityHeaders(response), request)
     }
 
     // 비밀번호 해시화
@@ -177,16 +190,19 @@ export async function POST(request: NextRequest) {
       return { company, admin }
     })
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       message: '회사 등록이 완료되었습니다.',
       companyCode: result.company.code,
       companyName: result.company.name,
       trialEndDate: result.company.trialEndDate
     })
+    
+    // CORS 헤더 설정
+    return setCorsHeaders(setSecurityHeaders(response), request)
 
   } catch (error) {
     console.error('회사 등록 에러:', error)
-    return NextResponse.json(
+    const errorResponse = NextResponse.json(
       { 
         message: '서버 오류가 발생했습니다.',
         error: error instanceof Error ? error.message : '알 수 없는 오류',
@@ -194,6 +210,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 500 }
     )
+    return setCorsHeaders(setSecurityHeaders(errorResponse), request)
   } finally {
     try {
       await prisma.$disconnect()

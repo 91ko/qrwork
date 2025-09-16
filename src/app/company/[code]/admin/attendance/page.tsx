@@ -16,7 +16,8 @@ import {
   Eye,
   CheckCircle,
   XCircle,
-  Trash2
+  Trash2,
+  Edit3
 } from 'lucide-react'
 
 interface AttendanceRecord {
@@ -70,6 +71,13 @@ export default function AttendanceRecordsPage() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]) // YYYY-MM-DD 형식
   const [showCustomFields, setShowCustomFields] = useState<string[]>([]) // 표시할 커스텀 필드들
   const [availableCustomFields, setAvailableCustomFields] = useState<string[]>([]) // 사용 가능한 커스텀 필드들
+  const [showEditModal, setShowEditModal] = useState(false) // 수정 모달 표시 여부
+  const [editingAttendance, setEditingAttendance] = useState<AttendanceRecord | null>(null) // 수정 중인 출퇴근 기록
+  const [editForm, setEditForm] = useState({
+    timestamp: '',
+    type: 'CHECK_IN',
+    location: ''
+  })
   const itemsPerPage = 20
 
   // 출퇴근 기록을 날짜별로 그룹화하는 함수
@@ -252,6 +260,55 @@ export default function AttendanceRecordsPage() {
       console.error('출퇴근 기록 삭제 에러:', error)
       alert('출퇴근 기록 삭제 중 오류가 발생했습니다.')
     }
+  }
+
+  const handleEditAttendance = (attendance: AttendanceRecord) => {
+    setEditingAttendance(attendance)
+    setEditForm({
+      timestamp: new Date(attendance.timestamp).toISOString().slice(0, 16), // YYYY-MM-DDTHH:MM 형식
+      type: attendance.type,
+      location: attendance.location || ''
+    })
+    setShowEditModal(true)
+  }
+
+  const handleUpdateAttendance = async () => {
+    if (!editingAttendance) return
+
+    try {
+      const response = await fetch(`/api/admin/attendance/${editingAttendance.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(editForm)
+      })
+
+      if (response.ok) {
+        alert('출퇴근 기록이 성공적으로 수정되었습니다.')
+        setShowEditModal(false)
+        setEditingAttendance(null)
+        // 현재 페이지 다시 로드
+        loadAttendances(currentPage)
+      } else {
+        const data = await response.json()
+        alert(data.message || '출퇴근 기록 수정에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('출퇴근 기록 수정 에러:', error)
+      alert('출퇴근 기록 수정 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false)
+    setEditingAttendance(null)
+    setEditForm({
+      timestamp: '',
+      type: 'CHECK_IN',
+      location: ''
+    })
   }
 
   const handleLogout = async () => {
@@ -654,22 +711,40 @@ export default function AttendanceRecordsPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           <div className="flex space-x-2">
                             {summary.checkIn && (
-                              <button
-                                onClick={() => handleDeleteAttendance(summary.checkIn!.id, summary.employee.name, 'CHECK_IN')}
-                                className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
-                                title="출근 기록 삭제"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
+                              <>
+                                <button
+                                  onClick={() => handleEditAttendance(summary.checkIn!)}
+                                  className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                                  title="출근 기록 수정"
+                                >
+                                  <Edit3 className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteAttendance(summary.checkIn!.id, summary.employee.name, 'CHECK_IN')}
+                                  className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
+                                  title="출근 기록 삭제"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </>
                             )}
                             {summary.checkOut && (
-                              <button
-                                onClick={() => handleDeleteAttendance(summary.checkOut!.id, summary.employee.name, 'CHECK_OUT')}
-                                className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
-                                title="퇴근 기록 삭제"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
+                              <>
+                                <button
+                                  onClick={() => handleEditAttendance(summary.checkOut!)}
+                                  className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                                  title="퇴근 기록 수정"
+                                >
+                                  <Edit3 className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteAttendance(summary.checkOut!.id, summary.employee.name, 'CHECK_OUT')}
+                                  className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
+                                  title="퇴근 기록 삭제"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </>
                             )}
                           </div>
                         </td>
@@ -768,6 +843,95 @@ export default function AttendanceRecordsPage() {
           </div>
         </div>
       </main>
+
+      {/* 수정 모달 */}
+      {showEditModal && editingAttendance && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">
+                  출퇴근 기록 수정
+                </h3>
+                <button
+                  onClick={handleCloseEditModal}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XCircle className="h-6 w-6" />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    직원명
+                  </label>
+                  <input
+                    type="text"
+                    value={editingAttendance.employee.name}
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    날짜 및 시간
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={editForm.timestamp}
+                    onChange={(e) => setEditForm({ ...editForm, timestamp: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    타입
+                  </label>
+                  <select
+                    value={editForm.type}
+                    onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="CHECK_IN">출근</option>
+                    <option value="CHECK_OUT">퇴근</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    위치 (선택사항)
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.location}
+                    onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                    placeholder="위치 정보를 입력하세요"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={handleCloseEditModal}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleUpdateAttendance}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                >
+                  수정
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

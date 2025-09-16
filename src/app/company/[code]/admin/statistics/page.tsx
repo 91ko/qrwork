@@ -226,8 +226,29 @@ export default function StatisticsPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">출퇴근 통계</h1>
-          <p className="text-gray-600">직원들의 출퇴근 패턴과 통계를 분석합니다</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">출퇴근 통계</h1>
+              <p className="text-gray-600">직원들의 출퇴근 패턴과 통계를 분석합니다</p>
+            </div>
+            <div className="flex space-x-3">
+              <Link
+                href={`/company/${companyCode}/admin/attendance`}
+                className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              >
+                <Clock className="h-4 w-4 mr-2" />
+                출퇴근 기록 관리
+              </Link>
+              <button
+                onClick={handleExport}
+                disabled={isLoading}
+                className="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium disabled:bg-gray-400 transition-colors"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                통계 내보내기
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Period Selection */}
