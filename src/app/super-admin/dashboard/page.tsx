@@ -59,30 +59,7 @@ export default function SuperAdminDashboard() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
 
-  const checkAuthStatus = useCallback(async () => {
-    try {
-      const response = await fetch('/api/super-admin/me', {
-        method: 'GET',
-        credentials: 'include'
-      })
-
-      if (response.ok) {
-        setIsAuthenticated(true)
-        loadDashboardData()
-      } else {
-        router.push('/super-admin/login')
-      }
-    } catch (error) {
-      console.error('인증 확인 에러:', error)
-      router.push('/super-admin/login')
-    }
-  }, [router])
-
-  useEffect(() => {
-    checkAuthStatus()
-  }, [checkAuthStatus])
-
-  const loadDashboardData = async (page = 1) => {
+  const loadDashboardData = useCallback(async (page = 1) => {
     try {
       setIsLoading(true)
       const params = new URLSearchParams({
@@ -125,7 +102,30 @@ export default function SuperAdminDashboard() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [searchTerm, statusFilter])
+
+  const checkAuthStatus = useCallback(async () => {
+    try {
+      const response = await fetch('/api/super-admin/me', {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        setIsAuthenticated(true)
+        loadDashboardData()
+      } else {
+        router.push('/super-admin/login')
+      }
+    } catch (error) {
+      console.error('인증 확인 에러:', error)
+      router.push('/super-admin/login')
+    }
+  }, [router, loadDashboardData])
+
+  useEffect(() => {
+    checkAuthStatus()
+  }, [checkAuthStatus])
 
   const handleApproveCompany = async (companyId: string, action: string) => {
     try {

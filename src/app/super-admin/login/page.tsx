@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Building2, Eye, EyeOff } from 'lucide-react'
 
 export default function SuperAdminLoginPage() {
@@ -143,9 +144,9 @@ export default function SuperAdminLoginPage() {
             <div className="text-center">
               <p className="text-sm text-gray-600">
                 일반 사용자는{' '}
-                <a href="/" className="font-medium text-blue-600 hover:text-blue-500">
+                <Link href="/" className="font-medium text-blue-600 hover:text-blue-500">
                   메인 페이지
-                </a>
+                </Link>
                 로 이동하세요
               </p>
             </div>
