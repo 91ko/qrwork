@@ -27,6 +27,7 @@ interface AttendanceRecord {
     id: string
     name: string
     username: string
+    phone?: string
     customFields?: string
   }
   qrCode?: {
@@ -40,6 +41,7 @@ interface AttendanceSummary {
     id: string
     name: string
     username: string
+    phone?: string
     customFields?: string
   }
   date: string

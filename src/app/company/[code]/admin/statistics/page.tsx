@@ -150,7 +150,33 @@ export default function StatisticsPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      loadStatistics()
+      const fetchStats = async () => {
+        try {
+          setIsLoading(true)
+          const params = new URLSearchParams({
+            period: selectedPeriod,
+            month: selectedMonth
+          })
+
+          const response = await fetch(`/api/admin/statistics?${params}`, {
+            method: 'GET',
+            credentials: 'include'
+          })
+
+          if (response.ok) {
+            const data = await response.json()
+            setStats(data.stats)
+          } else {
+            console.error('통계 조회 실패')
+          }
+        } catch (error) {
+          console.error('통계 조회 에러:', error)
+        } finally {
+          setIsLoading(false)
+        }
+      }
+      
+      fetchStats()
     }
   }, [isAuthenticated, selectedPeriod, selectedMonth])
 
