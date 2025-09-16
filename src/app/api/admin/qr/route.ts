@@ -55,8 +55,14 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    // QR 코드 이미지 URL 생성
+    const qrCodesWithImages = qrCodes.map(qr => ({
+      ...qr,
+      qrImageUrl: `/api/admin/qr/${qr.id}/image`
+    }))
+
     return NextResponse.json({
-      qrCodes: qrCodes
+      qrCodes: qrCodesWithImages
     })
 
   } catch (error) {
