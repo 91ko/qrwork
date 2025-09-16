@@ -1,18 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { getPrismaClient } from '@/lib/db-security'
+import { validateQRScan } from '@/lib/qr-security'
+import { securityMiddleware, setSecurityHeaders, errorHandlingMiddleware } from '@/lib/security-middleware'
+import { logger } from '@/lib/logger'
 
-const prisma = new PrismaClient()
+const prisma = getPrismaClient()
 
 // QR 스캔을 통한 출퇴근 기록
 export async function POST(request: NextRequest) {
+  const requestId = Math.random().toString(36).substring(2, 15)
+  
   try {
+    // 보안 미들웨어 적용
+    const securityResponse = securityMiddleware(request)
+    if (securityResponse) {
+      return setSecurityHeaders(securityResponse)
+    }
+
+    logger.api('QR 출퇴근 기록 API 호출', { requestId })
+    
     const body = await request.json()
     const { qrData, username } = body
 
     // 유효성 검사
     if (!qrData || !username) {
+      logger.warn('QR 출퇴근 기록 필수 필드 누락', { requestId, qrData: !!qrData, username: !!username })
       return NextResponse.json(
         { message: 'QR 데이터와 사용자 ID가 필요합니다.' },
+        { status: 400 }
+      )
+    }
+
+    // QR 스캔 보안 검증
+    const securityValidation = await validateQRScan(qrData, username, request)
+    if (!securityValidation.isValid) {
+      logger.security('QR 스캔 보안 검증 실패', { 
+        requestId, 
+        username, 
+        error: securityValidation.error 
+      })
+      return NextResponse.json(
+        { message: securityValidation.error },
         { status: 400 }
       )
     }
@@ -21,6 +49,7 @@ export async function POST(request: NextRequest) {
     try {
       parsedQrData = JSON.parse(qrData)
     } catch (error) {
+      logger.security('QR 데이터 파싱 실패', { requestId, username, error: error.message })
       return NextResponse.json(
         { message: '잘못된 QR 코드입니다.' },
         { status: 400 }
@@ -35,6 +64,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!company) {
+      logger.security('존재하지 않는 회사', { requestId, companyCode, username })
       return NextResponse.json(
         { message: '존재하지 않는 회사입니다.' },
         { status: 404 }
@@ -51,6 +81,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!employee) {
+      logger.security('존재하지 않는 직원', { requestId, username, companyCode })
       return NextResponse.json(
         { message: '존재하지 않는 직원입니다.' },
         { status: 404 }
@@ -67,6 +98,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!qrCode) {
+      logger.security('유효하지 않은 QR 코드', { requestId, qrCodeId, username, companyCode })
       return NextResponse.json(
         { message: '유효하지 않은 QR 코드입니다.' },
         { status: 404 }
@@ -127,13 +159,14 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('출퇴근 기록 에러:', error)
-    return NextResponse.json(
-      { message: '서버 오류가 발생했습니다.' },
-      { status: 500 }
-    )
+    logger.error('QR 출퇴근 기록 에러', { 
+      requestId, 
+      error: error.message,
+      stack: error.stack 
+    })
+    return errorHandlingMiddleware(error, request)
   } finally {
-    await prisma.$disconnect()
+    await prisma.disconnect()
   }
 }
 
