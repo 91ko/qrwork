@@ -161,8 +161,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     logger.error('QR 출퇴근 기록 에러', { 
       requestId, 
-      error: error.message,
-      stack: error.stack 
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
     })
     return errorHandlingMiddleware(error, request)
   } finally {
