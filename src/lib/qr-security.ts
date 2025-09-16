@@ -1,7 +1,9 @@
 import { NextRequest } from 'next/server'
-import { getPrismaClient } from './db-security'
+import { PrismaClient } from '@prisma/client'
 import { logger } from './logger'
 import { validateIPAddress } from './security'
+
+const prisma = new PrismaClient()
 
 // QR 스캔 보안 검증
 export interface QRSecurityValidation {
@@ -44,7 +46,6 @@ export async function validateQRScan(
     }
 
     // 2. 회사 및 QR 코드 유효성 검증
-    const prisma = getPrismaClient()
     
     const company = await prisma.company.findUnique({
       where: { code: companyCode }
@@ -257,7 +258,6 @@ async function checkDuplicateScan(
   qrCodeId: string,
   type: string
 ): Promise<{ isValid: boolean; error?: string }> {
-  const prisma = getPrismaClient()
   
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -294,7 +294,6 @@ async function recordScanAttempt(
   ip: string,
   userAgent: string
 ): Promise<void> {
-  const prisma = getPrismaClient()
   
   try {
     // 스캔 로그 테이블이 있다면 여기에 기록
@@ -336,9 +335,9 @@ function calculateDistance(
 
 // 클라이언트 IP 추출
 function getClientIP(request: NextRequest): string {
-  return request.ip || 
-         request.headers.get('x-forwarded-for') || 
+  return request.headers.get('x-forwarded-for') || 
          request.headers.get('x-real-ip') || 
+         request.headers.get('x-client-ip') ||
          'unknown'
 }
 
