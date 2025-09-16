@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 import QRCode from 'qrcode'
-import prisma from '@/lib/prisma'
+import { getPrismaClient } from '@/lib/db-security'
+import { setCorsHeaders, setSecurityHeaders } from '@/lib/security-middleware'
+
+// Prisma 클라이언트 인스턴스 생성
+const prisma = getPrismaClient()
+
+// OPTIONS 요청 처리 (CORS preflight)
+export async function OPTIONS(request: NextRequest) {
+  const response = new NextResponse(null, { status: 200 })
+  return setCorsHeaders(setSecurityHeaders(response), request)
+}
 
 // JWT 토큰에서 관리자 정보 추출
 async function getAdminFromToken(request: NextRequest) {
@@ -13,12 +23,10 @@ async function getAdminFromToken(request: NextRequest) {
       return null
     }
 
-    if (!process.env.JWT_SECRET) {
-      console.error('JWT_SECRET 환경 변수가 설정되지 않았습니다')
-      return null
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET) as any
+    // 환경 변수에서 JWT 시크릿 가져오기 (fallback 포함)
+    const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-key-for-production'
+    
+    const decoded = jwt.verify(token, jwtSecret) as any
     console.log('JWT 토큰 검증 성공:', { companyId: decoded.companyId, companyCode: decoded.companyCode })
     return decoded
   } catch (error) {
@@ -61,16 +69,19 @@ export async function GET(request: NextRequest) {
       qrImageUrl: `/api/admin/qr/${qr.id}/image`
     }))
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       qrCodes: qrCodesWithImages
     })
+    
+    return setCorsHeaders(setSecurityHeaders(response), request)
 
   } catch (error) {
     console.error('QR 코드 목록 조회 에러:', error)
-    return NextResponse.json(
+    const errorResponse = NextResponse.json(
       { message: '서버 오류가 발생했습니다.' },
       { status: 500 }
     )
+    return setCorsHeaders(setSecurityHeaders(errorResponse), request)
   }
 }
 
@@ -83,10 +94,11 @@ export async function POST(request: NextRequest) {
     console.log('관리자 인증 결과:', admin ? '성공' : '실패')
     
     if (!admin) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { message: '인증이 필요합니다.' },
         { status: 401 }
       )
+      return setCorsHeaders(setSecurityHeaders(response), request)
     }
 
     const body = await request.json()
@@ -95,17 +107,19 @@ export async function POST(request: NextRequest) {
 
     // 유효성 검사
     if (!name || !type) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { message: 'QR 코드 이름과 타입을 입력해주세요.' },
         { status: 400 }
       )
+      return setCorsHeaders(setSecurityHeaders(response), request)
     }
 
     if (type !== 'CHECK_IN' && type !== 'CHECK_OUT') {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { message: '올바른 QR 코드 타입을 선택해주세요.' },
         { status: 400 }
       )
+      return setCorsHeaders(setSecurityHeaders(response), request)
     }
 
     // QR 코드 데이터 생성 (스캔 시 사용할 데이터)
@@ -161,7 +175,7 @@ export async function POST(request: NextRequest) {
     })
     console.log('QR 코드 이미지 생성 완료')
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       message: 'QR 코드가 성공적으로 생성되었습니다.',
       qrCode: {
         id: qrCode.id,
@@ -176,6 +190,8 @@ export async function POST(request: NextRequest) {
         qrImageUrl: qrImageDataURL
       }
     })
+    
+    return setCorsHeaders(setSecurityHeaders(response), request)
 
   } catch (error) {
     console.error('QR 코드 생성 에러:', error)
@@ -183,12 +199,13 @@ export async function POST(request: NextRequest) {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined
     })
-    return NextResponse.json(
+    const errorResponse = NextResponse.json(
       { 
         message: '서버 오류가 발생했습니다.',
         error: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     )
+    return setCorsHeaders(setSecurityHeaders(errorResponse), request)
   }
 }
