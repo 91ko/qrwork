@@ -88,7 +88,7 @@ export default function LeaveManagementPage() {
       console.error('인증 확인 에러:', error)
       router.push('/auth/login')
     }
-  }, [companyCode, router])
+  }, [companyCode, router, loadData])
 
   const loadData = async () => {
     try {
@@ -220,6 +220,12 @@ export default function LeaveManagementPage() {
   useEffect(() => {
     checkAuthStatus()
   }, [checkAuthStatus])
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadLeaveRequests()
+    }
+  }, [isAuthenticated, loadLeaveRequests])
 
   useEffect(() => {
     if (activeTab === 'requests') {

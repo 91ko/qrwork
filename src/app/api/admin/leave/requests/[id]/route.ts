@@ -21,7 +21,7 @@ async function getAdminFromToken(request: NextRequest) {
 // 휴가 신청 승인/반려
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const admin = await getAdminFromToken(request)
@@ -33,6 +33,7 @@ export async function PUT(
       )
     }
 
+    const params = await context.params
     const body = await request.json()
     const { status, adminNote } = body
 

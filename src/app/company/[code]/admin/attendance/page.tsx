@@ -71,7 +71,7 @@ export default function AttendanceRecordsPage() {
       console.error('인증 확인 에러:', error)
       router.push('/auth/login')
     }
-  }, [companyCode, router])
+  }, [companyCode, router, loadAttendances])
 
   const loadAttendances = async (page = 1) => {
     try {

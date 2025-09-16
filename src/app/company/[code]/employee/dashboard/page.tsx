@@ -73,7 +73,7 @@ export default function EmployeeDashboardPage() {
       console.error('인증 확인 에러:', error)
       router.push(`/company/${companyCode}/scan`)
     }
-  }, [companyCode, router])
+  }, [companyCode, router, loadAttendances])
 
   const loadAttendances = async (date?: string) => {
     try {

@@ -88,7 +88,7 @@ export default function EmployeeLeavePage() {
       console.error('인증 확인 에러:', error)
       router.push(`/company/${companyCode}/scan`)
     }
-  }, [companyCode, router])
+  }, [companyCode, router, loadData])
 
   const loadData = async () => {
     try {
