@@ -76,7 +76,7 @@ export default function StatisticsPage() {
       console.error('인증 확인 에러:', error)
       router.push('/auth/login')
     }
-  }, [companyCode, router])
+  }, [companyCode, router, loadStatistics])
 
   const loadStatistics = useCallback(async () => {
     try {

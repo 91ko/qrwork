@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     try {
       parsedQrData = JSON.parse(qrData)
     } catch (error) {
-      logger.security('QR 데이터 파싱 실패', { requestId, username, error: error.message })
+      logger.security('QR 데이터 파싱 실패', { requestId, username, error: error instanceof Error ? error.message : 'Unknown error' })
       return NextResponse.json(
         { message: '잘못된 QR 코드입니다.' },
         { status: 400 }
