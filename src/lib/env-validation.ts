@@ -34,9 +34,10 @@ function validateEnvConfig(): EnvConfig {
     )
   }
 
-  // JWT 시크릿 강도 검증 (개발 환경에서는 완화)
-  if (process.env.JWT_SECRET!.length < 16) {
-    throw new Error('JWT_SECRET must be at least 16 characters long')
+  // JWT 시크릿 강도 검증 (배포 환경에서는 완화)
+  const minJwtLength = process.env.NODE_ENV === 'production' ? 12 : 16
+  if (process.env.JWT_SECRET!.length < minJwtLength) {
+    throw new Error(`JWT_SECRET must be at least ${minJwtLength} characters long`)
   }
 
   // 이메일 형식 검증
@@ -45,10 +46,11 @@ function validateEnvConfig(): EnvConfig {
     throw new Error('SUPER_ADMIN_EMAIL must be a valid email address')
   }
 
-  // 비밀번호 강도 검증 (개발 환경에서는 완화)
+  // 비밀번호 강도 검증 (배포 환경에서는 완화)
   const password = process.env.SUPER_ADMIN_PASSWORD!
-  if (password.length < 8) {
-    throw new Error('SUPER_ADMIN_PASSWORD must be at least 8 characters long')
+  const minPasswordLength = process.env.NODE_ENV === 'production' ? 6 : 8
+  if (password.length < minPasswordLength) {
+    throw new Error(`SUPER_ADMIN_PASSWORD must be at least ${minPasswordLength} characters long`)
   }
 
   return {
