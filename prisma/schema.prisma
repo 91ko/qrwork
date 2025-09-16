@@ -53,6 +53,7 @@ model Company {
   employeeLeaves EmployeeLeave[]
   subscriptions CompanySubscription[]
   payments      Payment[]
+  inquiries     Inquiry[]
 
   @@map("companies")
 }
@@ -127,6 +128,7 @@ model Admin {
   // 관계
   companyId String
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  inquiries Inquiry[]
 
   @@unique([email, companyId])
   @@map("admins")
@@ -151,6 +153,7 @@ model Employee {
   attendances Attendance[]
   leaveRequests LeaveRequest[]
   employeeLeaves EmployeeLeave[]
+  inquiries Inquiry[]
 
   @@unique([username, companyId])
   @@map("employees")
@@ -253,4 +256,28 @@ model EmployeeLeave {
 
   @@unique([employeeId, year])
   @@map("employee_leaves")
+}
+
+// 문의 모델
+model Inquiry {
+  id          String   @id @default(cuid())
+  title       String   // 문의 제목
+  content     String   // 문의 내용
+  type        String   @default("GENERAL") // GENERAL, TECHNICAL, BILLING, ACCOUNT, OTHER
+  status      String   @default("PENDING") // PENDING, IN_PROGRESS, RESOLVED, CLOSED
+  priority    String   @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  response    String?  // 관리자 답변
+  respondedAt DateTime? // 답변 일시
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 관계
+  companyId   String?
+  company     Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  adminId     String?
+  admin       Admin? @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  employeeId  String?
+  employee    Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("inquiries")
 }

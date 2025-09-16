@@ -15,6 +15,12 @@ export default function Header() {
           </div>
           <div className="flex space-x-4">
             <Link
+              href="/contact"
+              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+            >
+              문의하기
+            </Link>
+            <Link
               href="/auth/login"
               className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
             >
