@@ -1,9 +1,14 @@
-import DOMPurify from 'isomorphic-dompurify'
+// import DOMPurify from 'isomorphic-dompurify'
 
 // XSS 방지를 위한 HTML 정화
 export function sanitizeHtml(input: string): string {
   if (typeof input !== 'string') return ''
-  return DOMPurify.sanitize(input)
+  // 간단한 HTML 태그 제거 (DOMPurify 대신)
+  return input
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '')
 }
 
 // 입력 검증 및 정화
