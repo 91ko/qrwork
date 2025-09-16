@@ -208,11 +208,6 @@ export default function SuperAdminDashboard() {
     loadSubscriptionPlans()
   }, [checkAuthStatus, loadSubscriptionPlans])
 
-  useEffect(() => {
-    if (activeTab === 'inquiries') {
-      loadInquiries()
-    }
-  }, [activeTab, loadInquiries])
 
   const handleApproveCompany = async (companyId: string, action: string) => {
     try {
@@ -541,6 +536,12 @@ export default function SuperAdminDashboard() {
       console.error('문의 목록 로드 에러:', error)
     }
   }, [inquiryFilters])
+
+  useEffect(() => {
+    if (activeTab === 'inquiries') {
+      loadInquiries()
+    }
+  }, [activeTab, loadInquiries])
 
   const handleInquiryResponse = async (inquiryId: string) => {
     if (!inquiryResponse.trim()) {
