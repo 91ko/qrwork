@@ -246,9 +246,9 @@ function getTokenFromRequest(request: NextRequest): string | null {
 }
 
 function getClientIP(request: NextRequest): string {
-  return request.ip || 
-         request.headers.get('x-forwarded-for') || 
+  return request.headers.get('x-forwarded-for') || 
          request.headers.get('x-real-ip') || 
+         request.headers.get('x-client-ip') ||
          'unknown'
 }
 

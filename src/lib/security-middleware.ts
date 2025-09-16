@@ -35,7 +35,7 @@ export function rateLimitMiddleware(
   maxRequests: number = 100,
   windowMs: number = 15 * 60 * 1000
 ): NextResponse | null {
-  const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown'
+  const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || request.headers.get('x-client-ip') || 'unknown'
   const userAgent = request.headers.get('user-agent') || 'unknown'
   const identifier = `${ip}-${userAgent}`
   
@@ -68,7 +68,7 @@ export function rateLimitMiddleware(
 // 요청 로깅 미들웨어
 export function requestLoggingMiddleware(request: NextRequest): void {
   const startTime = Date.now()
-  const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown'
+  const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || request.headers.get('x-client-ip') || 'unknown'
   const userAgent = request.headers.get('user-agent') || 'unknown'
   
   // 민감한 정보 제외하고 로깅
