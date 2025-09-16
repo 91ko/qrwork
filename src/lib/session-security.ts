@@ -4,6 +4,8 @@ import { getPrismaClient } from './db-security'
 import { logger } from './logger'
 import { config } from './env-validation'
 
+const JWT_SECRET = config.security.jwtSecret
+
 // 세션 정보 인터페이스
 interface SessionInfo {
   sessionId: string
@@ -55,8 +57,8 @@ export function createSession(
       companyId,
       iat: Math.floor(Date.now() / 1000)
     },
-    config.security.jwtSecret,
-    { expiresIn: config.security.jwtExpiresIn }
+    JWT_SECRET,
+    { expiresIn: '7d' }
   )
   
   logger.auth('세션 생성', {
@@ -82,7 +84,7 @@ export function validateSession(request: NextRequest): {
       return { isValid: false, error: '토큰이 없습니다.' }
     }
     
-    const decoded = jwt.verify(token, config.security.jwtSecret) as any
+    const decoded = jwt.verify(token, JWT_SECRET) as any
     const sessionId = decoded.sessionId
     
     const sessionInfo = activeSessions.get(sessionId)
@@ -126,7 +128,7 @@ export function validateSession(request: NextRequest): {
     return { isValid: true, sessionInfo }
     
   } catch (error) {
-    logger.error('세션 검증 실패', { error: error.message })
+    logger.error('세션 검증 실패', { error: error instanceof Error ? error.message : 'Unknown error' })
     return { isValid: false, error: '세션 검증에 실패했습니다.' }
   }
 }
@@ -153,7 +155,7 @@ export function invalidateSession(sessionId: string): boolean {
 export function invalidateAllUserSessions(userId: string, userType: string): number {
   let invalidatedCount = 0
   
-  for (const [sessionId, sessionInfo] of activeSessions.entries()) {
+  for (const [sessionId, sessionInfo] of Array.from(activeSessions.entries())) {
     if (sessionInfo.userId === userId && sessionInfo.userType === userType) {
       sessionInfo.isActive = false
       activeSessions.delete(sessionId)
@@ -178,7 +180,7 @@ export function checkConcurrentSessions(
 ): boolean {
   let activeCount = 0
   
-  for (const sessionInfo of activeSessions.values()) {
+  for (const sessionInfo of Array.from(activeSessions.values())) {
     if (sessionInfo.userId === userId && 
         sessionInfo.userType === userType && 
         sessionInfo.isActive) {
@@ -195,7 +197,7 @@ export function cleanupExpiredSessions(): number {
   const maxAge = 24 * 60 * 60 * 1000 // 24시간
   let cleanedCount = 0
   
-  for (const [sessionId, sessionInfo] of activeSessions.entries()) {
+  for (const [sessionId, sessionInfo] of Array.from(activeSessions.entries())) {
     const sessionAge = now.getTime() - sessionInfo.lastActivity.getTime()
     
     if (sessionAge > maxAge) {
