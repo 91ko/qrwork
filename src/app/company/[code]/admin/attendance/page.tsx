@@ -49,31 +49,7 @@ export default function AttendanceRecordsPage() {
   const [totalPages, setTotalPages] = useState(1)
   const itemsPerPage = 20
 
-  const checkAuthStatus = useCallback(async () => {
-    try {
-      const response = await fetch('/api/auth/me', {
-        method: 'GET',
-        credentials: 'include'
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (data.company.code === companyCode) {
-          setIsAuthenticated(true)
-          loadAttendances()
-        } else {
-          router.push('/auth/login')
-        }
-      } else {
-        router.push('/auth/login')
-      }
-    } catch (error) {
-      console.error('인증 확인 에러:', error)
-      router.push('/auth/login')
-    }
-  }, [companyCode, router, loadAttendances])
-
-  const loadAttendances = async (page = 1) => {
+  const loadAttendances = useCallback(async (page = 1) => {
     try {
       setIsLoading(true)
       const params = new URLSearchParams({
@@ -103,7 +79,7 @@ export default function AttendanceRecordsPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [companyCode, searchTerm, dateFilter, typeFilter, itemsPerPage])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -150,6 +126,30 @@ export default function AttendanceRecordsPage() {
       console.error('로그아웃 에러:', error)
     }
   }
+
+  const checkAuthStatus = useCallback(async () => {
+    try {
+      const response = await fetch('/api/auth/me', {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.company.code === companyCode) {
+          setIsAuthenticated(true)
+          loadAttendances()
+        } else {
+          router.push('/auth/login')
+        }
+      } else {
+        router.push('/auth/login')
+      }
+    } catch (error) {
+      console.error('인증 확인 에러:', error)
+      router.push('/auth/login')
+    }
+  }, [companyCode, router, loadAttendances])
 
   useEffect(() => {
     checkAuthStatus()

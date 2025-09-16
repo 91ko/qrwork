@@ -90,7 +90,7 @@ export default function EmployeeLeavePage() {
     }
   }, [companyCode, router, loadData])
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setIsLoading(true)
       await Promise.all([
@@ -102,9 +102,9 @@ export default function EmployeeLeavePage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [loadLeaveInfo, loadLeaveRequests])
 
-  const loadLeaveInfo = async () => {
+  const loadLeaveInfo = useCallback(async () => {
     try {
       const response = await fetch('/api/employee/leave/info', {
         method: 'GET',
@@ -118,9 +118,9 @@ export default function EmployeeLeavePage() {
     } catch (error) {
       console.error('연차 정보 조회 에러:', error)
     }
-  }
+  }, [])
 
-  const loadLeaveRequests = async () => {
+  const loadLeaveRequests = useCallback(async () => {
     try {
       const response = await fetch('/api/employee/leave/requests', {
         method: 'GET',
@@ -134,7 +134,7 @@ export default function EmployeeLeavePage() {
     } catch (error) {
       console.error('휴가 신청 조회 에러:', error)
     }
-  }
+  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target

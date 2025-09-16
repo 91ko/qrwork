@@ -75,7 +75,7 @@ export default function EmployeeDashboardPage() {
     }
   }, [companyCode, router, loadAttendances])
 
-  const loadAttendances = async (date?: string) => {
+  const loadAttendances = useCallback(async (date?: string) => {
     try {
       setIsLoading(true)
       const targetDate = date || selectedDate
@@ -96,7 +96,7 @@ export default function EmployeeDashboardPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [selectedDate])
 
   const handleDateChange = (date: string) => {
     setSelectedDate(date)

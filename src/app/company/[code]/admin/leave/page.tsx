@@ -90,7 +90,7 @@ export default function LeaveManagementPage() {
     }
   }, [companyCode, router, loadData])
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setIsLoading(true)
       await Promise.all([
@@ -102,9 +102,9 @@ export default function LeaveManagementPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [loadLeaveRequests, loadEmployeeLeaves])
 
-  const loadLeaveRequests = async () => {
+  const loadLeaveRequests = useCallback(async () => {
     try {
       const params = new URLSearchParams()
       if (statusFilter !== 'ALL') params.append('status', statusFilter)
@@ -121,9 +121,9 @@ export default function LeaveManagementPage() {
     } catch (error) {
       console.error('휴가 신청 조회 에러:', error)
     }
-  }
+  }, [statusFilter])
 
-  const loadEmployeeLeaves = async () => {
+  const loadEmployeeLeaves = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/leave/employees', {
         method: 'GET',
@@ -137,7 +137,7 @@ export default function LeaveManagementPage() {
     } catch (error) {
       console.error('직원 연차 조회 에러:', error)
     }
-  }
+  }, [])
 
   const handleRequestAction = async () => {
     if (!selectedRequest) return
