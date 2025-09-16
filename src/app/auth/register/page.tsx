@@ -415,11 +415,11 @@ export default function RegisterPage() {
                 <button
                   onClick={() => {
                     setShowSuccessModal(false)
-                    router.push(`/company/${registeredCompany.companyCode}`)
+                    router.push(`/company/${registeredCompany.companyCode}/admin`)
                   }}
                   className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
-                  관리자 페이지로 이동
+                  관리자 로그인으로 이동
                 </button>
               </div>
             </div>
