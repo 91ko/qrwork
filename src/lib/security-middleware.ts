@@ -138,32 +138,37 @@ export function corsMiddleware(request: NextRequest): NextResponse | null {
   const allowedOrigins = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
+    'https://localhost:3000',
+    'https://127.0.0.1:3000',
     'https://your-domain.vercel.app', // 실제 도메인으로 변경
     process.env.NEXT_PUBLIC_BASE_URL
   ].filter(Boolean)
   
   // 개발 환경에서는 모든 origin 허용
   if (process.env.NODE_ENV === 'development') {
+    console.log('개발 환경: CORS 검사 건너뜀', { origin, url: request.url })
     return null
   }
   
-  if (origin && !allowedOrigins.includes(origin)) {
-    console.warn(`CORS violation: ${origin}`, {
-      origin,
-      url: request.url,
-      method: request.method
-    })
-    
-    return new NextResponse(
-      JSON.stringify({ message: 'CORS policy violation' }),
-      { 
-        status: 403,
-        headers: { 'Content-Type': 'application/json' }
-      }
-    )
+  // origin이 없거나 허용된 origin이면 통과
+  if (!origin || allowedOrigins.includes(origin)) {
+    return null
   }
   
-  return null
+  console.warn(`CORS violation: ${origin}`, {
+    origin,
+    url: request.url,
+    method: request.method,
+    allowedOrigins
+  })
+  
+  return new NextResponse(
+    JSON.stringify({ message: 'CORS policy violation' }),
+    { 
+      status: 403,
+      headers: { 'Content-Type': 'application/json' }
+    }
+  )
 }
 
 // 보안 미들웨어 통합
