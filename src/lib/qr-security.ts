@@ -29,7 +29,7 @@ export async function validateQRScan(
       logger.security('잘못된 QR 데이터 형식', { 
         qrData: qrData.substring(0, 100),
         username,
-        error: error.message 
+        error: error instanceof Error ? error.message : 'Unknown error'
       })
       return { isValid: false, error: '잘못된 QR 코드입니다.' }
     }
