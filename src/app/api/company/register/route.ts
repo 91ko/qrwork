@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 import { getPrismaClient } from '@/lib/db-security'
 import { sanitizeInput, validateEmail, validatePassword } from '@/lib/security'
 import { securityMiddleware, setSecurityHeaders, setCorsHeaders, errorHandlingMiddleware } from '@/lib/security-middleware'
-import { logger } from '@/lib/logger'
+// import { logger } from '@/lib/logger' // 임시 비활성화
 
 // Prisma 클라이언트 인스턴스 생성
 const prisma = getPrismaClient()
@@ -34,10 +34,10 @@ export async function POST(request: NextRequest) {
     //   return setSecurityHeaders(securityResponse)
     // }
 
-    logger.api('회사 등록 API 호출됨', { requestId })
+    console.log('회사 등록 API 호출됨', { requestId })
     
     const body = await request.json()
-    logger.debug('받은 데이터', { requestId, body: sanitizeInput(JSON.stringify(body)) })
+    console.log('받은 데이터', { requestId, body: sanitizeInput(JSON.stringify(body)) })
     
     const { 
       companyName, 
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     // 유효성 검사
     if (!sanitizedData.companyName || !sanitizedData.adminName || !sanitizedData.email || !sanitizedData.password) {
-      logger.warn('필수 필드 누락', { requestId, sanitizedData })
+      console.warn('필수 필드 누락', { requestId, sanitizedData })
       const response = NextResponse.json(
         { message: '필수 정보를 모두 입력해주세요.' },
         { status: 400 }
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     // 이메일 형식 검증
     if (!validateEmail(sanitizedData.email)) {
-      logger.warn('잘못된 이메일 형식', { requestId, email: sanitizedData.email })
+      console.warn('잘못된 이메일 형식', { requestId, email: sanitizedData.email })
       const response = NextResponse.json(
         { message: '올바른 이메일 형식을 입력해주세요.' },
         { status: 400 }
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     // 비밀번호 강도 검증
     const passwordValidation = validatePassword(sanitizedData.password)
     if (!passwordValidation.isValid) {
-      logger.warn('약한 비밀번호', { requestId, errors: passwordValidation.errors })
+      console.warn('약한 비밀번호', { requestId, errors: passwordValidation.errors })
       const response = NextResponse.json(
         { message: '비밀번호 요구사항을 만족하지 않습니다.', errors: passwordValidation.errors },
         { status: 400 }
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (sanitizedData.password !== sanitizedData.confirmPassword) {
-      logger.warn('비밀번호 불일치', { requestId })
+      console.warn('비밀번호 불일치', { requestId })
       const response = NextResponse.json(
         { message: '비밀번호가 일치하지 않습니다.' },
         { status: 400 }
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!sanitizedData.agreeTerms) {
-      logger.warn('이용약관 미동의', { requestId })
+      console.warn('이용약관 미동의', { requestId })
       const response = NextResponse.json(
         { message: '이용약관에 동의해주세요.' },
         { status: 400 }
@@ -110,9 +110,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 데이터베이스 연결 테스트
-    logger.database('데이터베이스 연결 테스트 중...', { requestId })
+    console.log('데이터베이스 연결 테스트 중...', { requestId })
     await prisma.connect()
-    logger.database('데이터베이스 연결 성공', { requestId })
+    console.log('데이터베이스 연결 성공', { requestId })
 
     // 이메일 중복 확인
     console.log('이메일 중복 확인 중...')

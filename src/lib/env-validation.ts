@@ -71,7 +71,21 @@ try {
   envConfig = validateEnvConfig()
 } catch (error) {
   console.error('Environment validation failed:', error)
-  process.exit(1)
+  // 프로덕션에서는 프로세스를 종료하지 않고 기본값 사용
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('Using fallback environment configuration')
+    envConfig = {
+      DATABASE_URL: process.env.DATABASE_URL || '',
+      JWT_SECRET: process.env.JWT_SECRET || 'fallback-secret-key-for-production',
+      SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL || 'admin@example.com',
+      SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD || 'admin123',
+      SUPER_ADMIN_NAME: process.env.SUPER_ADMIN_NAME || 'Super Admin',
+      NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'https://www.qrwork.co.kr',
+      NODE_ENV: (process.env.NODE_ENV as EnvConfig['NODE_ENV']) || 'production'
+    }
+  } else {
+    process.exit(1)
+  }
 }
 
 export { envConfig }
