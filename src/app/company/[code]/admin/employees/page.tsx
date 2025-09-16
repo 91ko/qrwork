@@ -135,11 +135,11 @@ export default function EmployeeManagementPage() {
     // 커스텀 필드 파싱
     try {
       const parsedCustomFields = JSON.parse(employee.customFields || '{}')
-      const fieldsArray = Object.entries(parsedCustomFields).map(([key, value]) => ({
+      const fieldsArray = Object.entries(parsedCustomFields as Record<string, string>).map(([key, value]) => ({
         id: key,
         name: key,
         type: 'text',
-        value: value as string,
+        value: value,
         showInAttendance: true
       }))
       setCustomFields(fieldsArray)
@@ -347,11 +347,11 @@ export default function EmployeeManagementPage() {
                         {(() => {
                           try {
                             const customFields = JSON.parse(employee.customFields || '{}')
-                            const fields = Object.entries(customFields).slice(0, 2)
+                            const fields = Object.entries(customFields as Record<string, string>).slice(0, 2)
                             return fields.length > 0 ? (
                               <div className="text-sm text-gray-900">
                                 {fields.map(([key, value]) => (
-                                  <div key={key}>{key}: {value as string}</div>
+                                  <div key={key}>{key}: {value}</div>
                                 ))}
                                 {Object.keys(customFields).length > 2 && (
                                   <div className="text-xs text-gray-500">+{Object.keys(customFields).length - 2}개 더</div>

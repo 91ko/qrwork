@@ -15,7 +15,8 @@ import {
   LogOut,
   Eye,
   CheckCircle,
-  XCircle
+  XCircle,
+  Trash2
 } from 'lucide-react'
 
 interface AttendanceRecord {
@@ -68,6 +69,7 @@ export default function AttendanceRecordsPage() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)) // YYYY-MM 형식
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]) // YYYY-MM-DD 형식
   const [showCustomFields, setShowCustomFields] = useState<string[]>([]) // 표시할 커스텀 필드들
+  const [availableCustomFields, setAvailableCustomFields] = useState<string[]>([]) // 사용 가능한 커스텀 필드들
   const itemsPerPage = 20
 
   // 출퇴근 기록을 날짜별로 그룹화하는 함수
@@ -147,6 +149,30 @@ export default function AttendanceRecordsPage() {
         setAttendanceSummaries(summaries)
         setTotalPages(Math.ceil(data.total / itemsPerPage))
         setCurrentPage(page)
+        
+        // 사용 가능한 커스텀 필드들 추출
+        const customFieldsSet = new Set<string>()
+        data.attendances.forEach((attendance: AttendanceRecord) => {
+          if (attendance.employee.customFields) {
+            try {
+              const customFields = JSON.parse(attendance.employee.customFields)
+              Object.keys(customFields).forEach(key => {
+                if (customFields[key] && customFields[key].trim() !== '') {
+                  customFieldsSet.add(key)
+                }
+              })
+            } catch (error) {
+              console.warn('커스텀 필드 파싱 에러:', error)
+            }
+          }
+        })
+        
+        // 기본 필드들도 추가
+        const allAvailableFields = [
+          'department', 'position', 'employeeId', 'phone',
+          ...Array.from(customFieldsSet)
+        ]
+        setAvailableCustomFields(allAvailableFields)
       } else {
         console.error('출퇴근 기록 조회 실패')
       }
@@ -200,6 +226,31 @@ export default function AttendanceRecordsPage() {
       }
     } catch (error) {
       console.error('출퇴근 기록 내보내기 에러:', error)
+    }
+  }
+
+  const handleDeleteAttendance = async (attendanceId: string, employeeName: string, type: string) => {
+    if (!confirm(`정말로 ${employeeName}님의 ${type === 'CHECK_IN' ? '출근' : '퇴근'} 기록을 삭제하시겠습니까?`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/admin/attendance/${attendanceId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        alert('출퇴근 기록이 성공적으로 삭제되었습니다.')
+        // 현재 페이지 다시 로드
+        loadAttendances(currentPage)
+      } else {
+        const data = await response.json()
+        alert(data.message || '출퇴근 기록 삭제에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('출퇴근 기록 삭제 에러:', error)
+      alert('출퇴근 기록 삭제 중 오류가 발생했습니다.')
     }
   }
 
@@ -375,66 +426,34 @@ export default function AttendanceRecordsPage() {
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">표시할 정보 선택</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={showCustomFields.includes('department')}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setShowCustomFields([...showCustomFields, 'department'])
-                  } else {
-                    setShowCustomFields(showCustomFields.filter(field => field !== 'department'))
-                  }
-                }}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2"
-              />
-              <span className="text-sm text-gray-700">부서</span>
-            </label>
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={showCustomFields.includes('position')}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setShowCustomFields([...showCustomFields, 'position'])
-                  } else {
-                    setShowCustomFields(showCustomFields.filter(field => field !== 'position'))
-                  }
-                }}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2"
-              />
-              <span className="text-sm text-gray-700">직급</span>
-            </label>
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={showCustomFields.includes('employeeId')}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setShowCustomFields([...showCustomFields, 'employeeId'])
-                  } else {
-                    setShowCustomFields(showCustomFields.filter(field => field !== 'employeeId'))
-                  }
-                }}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2"
-              />
-              <span className="text-sm text-gray-700">사번</span>
-            </label>
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={showCustomFields.includes('phone')}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setShowCustomFields([...showCustomFields, 'phone'])
-                  } else {
-                    setShowCustomFields(showCustomFields.filter(field => field !== 'phone'))
-                  }
-                }}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2"
-              />
-              <span className="text-sm text-gray-700">전화번호</span>
-            </label>
+            {availableCustomFields.map((field) => {
+              const fieldLabels: { [key: string]: string } = {
+                'department': '부서',
+                'position': '직급', 
+                'employeeId': '사번',
+                'phone': '전화번호'
+              }
+              
+              const fieldLabel = fieldLabels[field] || field
+              
+              return (
+                <label key={field} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={showCustomFields.includes(field)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setShowCustomFields([...showCustomFields, field])
+                      } else {
+                        setShowCustomFields(showCustomFields.filter(f => f !== field))
+                      }
+                    }}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2"
+                  />
+                  <span className="text-sm text-gray-700">{fieldLabel}</span>
+                </label>
+              )
+            })}
           </div>
         </div>
 
@@ -530,32 +549,31 @@ export default function AttendanceRecordsPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     근무시간
                   </th>
-                  {showCustomFields.includes('department') && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      부서
-                    </th>
-                  )}
-                  {showCustomFields.includes('position') && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      직급
-                    </th>
-                  )}
-                  {showCustomFields.includes('employeeId') && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      사번
-                    </th>
-                  )}
-                  {showCustomFields.includes('phone') && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      전화번호
-                    </th>
-                  )}
+                  {showCustomFields.map((field) => {
+                    const fieldLabels: { [key: string]: string } = {
+                      'department': '부서',
+                      'position': '직급', 
+                      'employeeId': '사번',
+                      'phone': '전화번호'
+                    }
+                    
+                    const fieldLabel = fieldLabels[field] || field
+                    
+                    return (
+                      <th key={field} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {fieldLabel}
+                      </th>
+                    )
+                  })}
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    작업
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {attendanceSummaries.length === 0 ? (
                   <tr>
-                    <td colSpan={5 + showCustomFields.length} className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan={6 + showCustomFields.length} className="px-6 py-12 text-center text-gray-500">
                       {searchTerm || dateFilter || typeFilter !== 'ALL' 
                         ? '검색 결과가 없습니다.' 
                         : '출퇴근 기록이 없습니다.'}
@@ -618,26 +636,43 @@ export default function AttendanceRecordsPage() {
                             <span className="text-gray-400 text-sm">-</span>
                           )}
                         </td>
-                        {showCustomFields.includes('department') && (
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {customFields.department || '-'}
-                          </td>
-                        )}
-                        {showCustomFields.includes('position') && (
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {customFields.position || '-'}
-                          </td>
-                        )}
-                        {showCustomFields.includes('employeeId') && (
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {customFields.employeeId || '-'}
-                          </td>
-                        )}
-                        {showCustomFields.includes('phone') && (
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {summary.employee.phone || '-'}
-                          </td>
-                        )}
+                        {showCustomFields.map((field) => {
+                          let value = '-'
+                          
+                          if (field === 'phone') {
+                            value = summary.employee.phone || '-'
+                          } else if (customFields[field]) {
+                            value = customFields[field]
+                          }
+                          
+                          return (
+                            <td key={field} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {value}
+                            </td>
+                          )
+                        })}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <div className="flex space-x-2">
+                            {summary.checkIn && (
+                              <button
+                                onClick={() => handleDeleteAttendance(summary.checkIn!.id, summary.employee.name, 'CHECK_IN')}
+                                className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
+                                title="출근 기록 삭제"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
+                            {summary.checkOut && (
+                              <button
+                                onClick={() => handleDeleteAttendance(summary.checkOut!.id, summary.employee.name, 'CHECK_OUT')}
+                                className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
+                                title="퇴근 기록 삭제"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
                       </tr>
                     )
                   })
