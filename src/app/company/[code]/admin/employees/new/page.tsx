@@ -441,7 +441,7 @@ export default function NewEmployeePage() {
                 }
                 
                 return (
-                <div key={field.id} className="mb-4">
+                  <div key={field.id} className="mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <label className="block text-sm font-medium text-gray-700">
                       {field.name}
@@ -518,8 +518,9 @@ export default function NewEmployeePage() {
                       placeholder={`${field.name}을 입력하세요`}
                     />
                   )}
-                </div>
-              ))}
+                  </div>
+                )
+              })}
             </div>
 
             {/* Error Message */}
