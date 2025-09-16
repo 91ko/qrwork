@@ -131,7 +131,9 @@ export default function QrScanPage() {
     }
   }
 
-  const handleAttendance = async (type: 'CHECK_IN' | 'CHECK_OUT') => {
+  const handleAttendance = async () => {
+    if (!nextAttendanceType) return
+    
     setIsLoading(true)
     setError('')
 
@@ -143,7 +145,7 @@ export default function QrScanPage() {
         },
         credentials: 'include',
         body: JSON.stringify({
-          type,
+          type: nextAttendanceType,
           companyCode
         }),
       })
@@ -151,8 +153,12 @@ export default function QrScanPage() {
       if (response.ok) {
         const data = await response.json()
         setLastAttendance(data.attendance)
+        // QR 스캔 상태 초기화
+        setIsQrScanned(false)
+        setScannedQrData(null)
+        setQrScanResult('')
         // 성공 메시지 표시
-        alert(type === 'CHECK_IN' ? '출근이 기록되었습니다!' : '퇴근이 기록되었습니다!')
+        alert(nextAttendanceType === 'CHECK_IN' ? '출근이 기록되었습니다!' : '퇴근이 기록되었습니다!')
       } else {
         const data = await response.json()
         setError(data.message || '출퇴근 기록에 실패했습니다.')
