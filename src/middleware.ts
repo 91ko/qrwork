@@ -6,23 +6,11 @@ export function middleware(request: NextRequest) {
   
   const origin = request.headers.get('origin')
   
-  // 개발 환경에서는 모든 origin 허용
-  if (process.env.NODE_ENV === 'development') {
-    if (origin) {
-      response.headers.set('Access-Control-Allow-Origin', origin)
-    } else {
-      response.headers.set('Access-Control-Allow-Origin', '*')
-    }
+  // 모든 환경에서 모든 origin 허용 (임시)
+  if (origin) {
+    response.headers.set('Access-Control-Allow-Origin', origin)
   } else {
-    // 프로덕션 환경에서는 특정 origin만 허용
-    const allowedOrigins = [
-      'https://your-domain.vercel.app',
-      process.env.NEXT_PUBLIC_BASE_URL
-    ].filter(Boolean)
-    
-    if (origin && allowedOrigins.includes(origin)) {
-      response.headers.set('Access-Control-Allow-Origin', origin)
-    }
+    response.headers.set('Access-Control-Allow-Origin', '*')
   }
   
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')

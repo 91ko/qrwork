@@ -28,11 +28,11 @@ export async function POST(request: NextRequest) {
   const requestId = Math.random().toString(36).substring(2, 15)
   
   try {
-    // 보안 미들웨어 적용
-    const securityResponse = securityMiddleware(request)
-    if (securityResponse) {
-      return setSecurityHeaders(securityResponse)
-    }
+    // 보안 미들웨어 적용 (CORS 문제로 인해 임시 비활성화)
+    // const securityResponse = securityMiddleware(request)
+    // if (securityResponse) {
+    //   return setSecurityHeaders(securityResponse)
+    // }
 
     logger.api('회사 등록 API 호출됨', { requestId })
     

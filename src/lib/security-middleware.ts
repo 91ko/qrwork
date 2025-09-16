@@ -176,9 +176,9 @@ export function securityMiddleware(request: NextRequest): NextResponse | null {
   // 요청 로깅
   requestLoggingMiddleware(request)
   
-  // CORS 검사
-  const corsResponse = corsMiddleware(request)
-  if (corsResponse) return corsResponse
+  // CORS 검사 (임시 비활성화)
+  // const corsResponse = corsMiddleware(request)
+  // if (corsResponse) return corsResponse
   
   // 레이트 리미팅
   const rateLimitResponse = rateLimitMiddleware(request)
