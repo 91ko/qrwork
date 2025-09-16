@@ -66,44 +66,6 @@ export default function LeaveManagementPage() {
   const [adminNote, setAdminNote] = useState('')
   const [actionType, setActionType] = useState<'approve' | 'reject'>('approve')
 
-  const checkAuthStatus = useCallback(async () => {
-    try {
-      const response = await fetch('/api/auth/me', {
-        method: 'GET',
-        credentials: 'include'
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (data.company.code === companyCode) {
-          setIsAuthenticated(true)
-          loadData()
-        } else {
-          router.push('/auth/login')
-        }
-      } else {
-        router.push('/auth/login')
-      }
-    } catch (error) {
-      console.error('인증 확인 에러:', error)
-      router.push('/auth/login')
-    }
-  }, [companyCode, router, loadData])
-
-  const loadData = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      await Promise.all([
-        loadLeaveRequests(),
-        loadEmployeeLeaves()
-      ])
-    } catch (error) {
-      console.error('데이터 로드 에러:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [loadLeaveRequests, loadEmployeeLeaves])
-
   const loadLeaveRequests = useCallback(async () => {
     try {
       const params = new URLSearchParams()
@@ -138,6 +100,44 @@ export default function LeaveManagementPage() {
       console.error('직원 연차 조회 에러:', error)
     }
   }, [])
+
+  const loadData = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      await Promise.all([
+        loadLeaveRequests(),
+        loadEmployeeLeaves()
+      ])
+    } catch (error) {
+      console.error('데이터 로드 에러:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [loadLeaveRequests, loadEmployeeLeaves])
+
+  const checkAuthStatus = useCallback(async () => {
+    try {
+      const response = await fetch('/api/auth/me', {
+        method: 'GET',
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.company.code === companyCode) {
+          setIsAuthenticated(true)
+          loadData()
+        } else {
+          router.push('/auth/login')
+        }
+      } else {
+        router.push('/auth/login')
+      }
+    } catch (error) {
+      console.error('인증 확인 에러:', error)
+      router.push('/auth/login')
+    }
+  }, [companyCode, router, loadData])
 
   const handleRequestAction = async () => {
     if (!selectedRequest) return
@@ -231,7 +231,7 @@ export default function LeaveManagementPage() {
     if (activeTab === 'requests') {
       loadLeaveRequests()
     }
-  }, [statusFilter, activeTab])
+  }, [statusFilter, activeTab, loadLeaveRequests])
 
   if (isLoading) {
     return (

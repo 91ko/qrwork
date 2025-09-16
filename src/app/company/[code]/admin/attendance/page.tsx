@@ -79,7 +79,7 @@ export default function AttendanceRecordsPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [companyCode, searchTerm, dateFilter, typeFilter, itemsPerPage])
+  }, [searchTerm, dateFilter, typeFilter, itemsPerPage])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
