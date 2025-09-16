@@ -19,6 +19,9 @@ model Company {
   trialEndDate  DateTime // 무료 체험 종료일
   maxEmployees  Int      @default(10) // 최대 직원 수
   isActive      Boolean  @default(true)
+  isApproved    Boolean  @default(false) // 최종 관리자 승인 여부
+  subscriptionStatus String @default("TRIAL") // TRIAL, ACTIVE, EXPIRED, SUSPENDED
+  subscriptionEndDate DateTime? // 구독 종료일
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -32,6 +35,19 @@ model Company {
   employeeLeaves EmployeeLeave[]
 
   @@map("companies")
+}
+
+// 최종 관리자 모델
+model SuperAdmin {
+  id        String   @id @default(cuid())
+  name      String   // 최종 관리자 이름
+  email     String   @unique // 이메일
+  password  String   // 해시된 비밀번호
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("super_admins")
 }
 
 // 관리자 모델
