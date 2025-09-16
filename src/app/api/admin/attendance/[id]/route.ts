@@ -1,10 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminFromToken } from '@/lib/admin-auth'
-import { getPrismaClient } from '@/lib/db-security'
+import jwt from 'jsonwebtoken'
+import prisma from '@/lib/prisma'
 import { setCorsHeaders, setSecurityHeaders } from '@/lib/security-middleware'
-import { logger } from '@/lib/logger'
 
-const prisma = getPrismaClient()
+// JWT 토큰에서 관리자 정보 추출
+async function getAdminFromToken(request: NextRequest) {
+  try {
+    const token = request.cookies.get('token')?.value
+    
+    if (!token) {
+      return null
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
+    
+    if (!decoded.adminId || !decoded.companyId) {
+      return null
+    }
+
+    return {
+      adminId: decoded.adminId,
+      companyId: decoded.companyId,
+      email: decoded.email,
+      role: decoded.role
+    }
+  } catch (error) {
+    console.error('토큰 검증 에러:', error)
+    return null
+  }
+}
 
 // OPTIONS 요청 처리 (CORS preflight)
 export async function OPTIONS(request: NextRequest) {
@@ -97,7 +121,7 @@ export async function PUT(
       }
     })
 
-    logger.api('출퇴근 기록 수정됨', {
+    console.log('출퇴근 기록 수정됨:', {
       attendanceId: id,
       employeeId: attendance.employee.id,
       adminId: admin.adminId,
@@ -124,11 +148,7 @@ export async function PUT(
     )
     return setCorsHeaders(setSecurityHeaders(errorResponse), request)
   } finally {
-    try {
-      await prisma.$disconnect()
-    } catch (disconnectError) {
-      console.error('Prisma 연결 해제 에러:', disconnectError)
-    }
+    await prisma.$disconnect()
   }
 }
 
@@ -181,7 +201,7 @@ export async function DELETE(
       where: { id: id }
     })
 
-    logger.api('출퇴근 기록 삭제됨', {
+    console.log('출퇴근 기록 삭제됨:', {
       attendanceId: id,
       employeeId: attendance.employee.id,
       adminId: admin.adminId,
@@ -206,10 +226,6 @@ export async function DELETE(
     )
     return setCorsHeaders(setSecurityHeaders(errorResponse), request)
   } finally {
-    try {
-      await prisma.$disconnect()
-    } catch (disconnectError) {
-      console.error('Prisma 연결 해제 에러:', disconnectError)
-    }
+    await prisma.$disconnect()
   }
 }
