@@ -42,6 +42,8 @@ export default function NewQrCodePage() {
     name: '',
     type: 'CHECK_IN' as 'CHECK_IN' | 'CHECK_OUT',
     location: '',
+    latitude: 0,
+    longitude: 0,
     radius: 100,
     isActive: true
   })
@@ -50,6 +52,7 @@ export default function NewQrCodePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [generatedQr, setGeneratedQr] = useState<GeneratedQrCode | null>(null)
   const [isGeocoding, setIsGeocoding] = useState(false)
+  const [isGettingLocation, setIsGettingLocation] = useState(false)
 
   const checkAuthStatus = useCallback(async () => {
     try {
@@ -135,7 +138,9 @@ export default function NewQrCodePage() {
       if (locationData) {
         setFormData(prev => ({
           ...prev,
-          location: locationData.address
+          location: locationData.address,
+          latitude: locationData.latitude,
+          longitude: locationData.longitude
         }))
         setError('')
       } else {
@@ -145,6 +150,56 @@ export default function NewQrCodePage() {
       setError('주소 검색 중 오류가 발생했습니다.')
     } finally {
       setIsGeocoding(false)
+    }
+  }
+
+  const handleGetCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      setError('이 브라우저는 위치 서비스를 지원하지 않습니다.')
+      return
+    }
+
+    setIsGettingLocation(true)
+    setError('')
+
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 300000 // 5분
+        })
+      })
+
+      const { latitude, longitude } = position.coords
+      
+      // 역지오코딩으로 주소 가져오기
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`)
+        const data = await response.json()
+        
+        const address = data.display_name || `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+        
+        setFormData(prev => ({
+          ...prev,
+          location: address,
+          latitude: latitude,
+          longitude: longitude
+        }))
+      } catch (reverseError) {
+        // 역지오코딩 실패 시 좌표만 설정
+        setFormData(prev => ({
+          ...prev,
+          location: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+          latitude: latitude,
+          longitude: longitude
+        }))
+      }
+    } catch (error) {
+      console.error('위치 가져오기 에러:', error)
+      setError('현재 위치를 가져올 수 없습니다. 위치 권한을 확인해주세요.')
+    } finally {
+      setIsGettingLocation(false)
     }
   }
 
@@ -336,22 +391,47 @@ export default function NewQrCodePage() {
                       placeholder="예: 서울시 강남구 테헤란로 123"
                     />
                   </div>
-                  <div className="flex items-end">
+                  <div className="flex items-end space-x-2">
                     <button
                       type="button"
                       onClick={handleLocationGeocode}
                       disabled={isGeocoding}
-                      className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400"
+                      className="flex-1 flex items-center justify-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400 text-sm"
                     >
                       {isGeocoding ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-1"></div>
                       ) : (
-                        <Navigation className="h-4 w-4 mr-2" />
+                        <Navigation className="h-4 w-4 mr-1" />
                       )}
-                      {isGeocoding ? '검색 중...' : '주소 검색'}
+                      {isGeocoding ? '검색' : '주소 검색'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleGetCurrentLocation}
+                      disabled={isGettingLocation}
+                      className="flex-1 flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-400 text-sm"
+                    >
+                      {isGettingLocation ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-1"></div>
+                      ) : (
+                        <MapPin className="h-4 w-4 mr-1" />
+                      )}
+                      {isGettingLocation ? '위치' : '현재 위치'}
                     </button>
                   </div>
                 </div>
+
+                {/* 위치 좌표 표시 */}
+                {(formData.latitude !== 0 || formData.longitude !== 0) && (
+                  <div className="bg-blue-50 p-3 rounded-md">
+                    <p className="text-sm text-blue-800">
+                      <strong>설정된 위치:</strong> {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
+                    </p>
+                    <p className="text-xs text-blue-600 mt-1">
+                      이 좌표를 기준으로 허용 반경 내에서만 QR 스캔이 가능합니다.
+                    </p>
+                  </div>
+                )}
 
                 <div>
                   <label htmlFor="radius" className="block text-sm font-medium text-gray-700 mb-2">

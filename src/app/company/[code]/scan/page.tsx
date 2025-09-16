@@ -167,15 +167,44 @@ export default function QrScanPage() {
     setError('')
 
     try {
+      // GPS 위치 정보 가져오기
+      let locationData = null
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 300000 // 5분
+            })
+          })
+          
+          locationData = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy
+          }
+        } catch (locationError) {
+          console.warn('위치 정보를 가져올 수 없습니다:', locationError)
+          // 위치 정보가 없어도 계속 진행 (선택적)
+        }
+      }
+
       const response = await fetch('/api/app/attendance', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(locationData && {
+            'X-Latitude': locationData.latitude.toString(),
+            'X-Longitude': locationData.longitude.toString(),
+            'X-Accuracy': locationData.accuracy.toString()
+          })
         },
         credentials: 'include',
         body: JSON.stringify({
           qrData: qrData,
-          username: employee.username
+          username: employee.username,
+          location: locationData
         }),
       })
 
