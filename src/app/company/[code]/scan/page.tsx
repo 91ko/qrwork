@@ -239,13 +239,13 @@ export default function QrScanPage() {
     }
   }
 
-  const stopCamera = () => {
+  const stopCamera = useCallback(() => {
     if (cameraStream) {
       cameraStream.getTracks().forEach(track => track.stop())
       setCameraStream(null)
       setIsCameraActive(false)
     }
-  }
+  }, [cameraStream])
 
   const handleLogout = () => {
     stopCamera() // 로그아웃 시 카메라도 중지

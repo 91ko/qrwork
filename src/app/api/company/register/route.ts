@@ -46,7 +46,8 @@ export async function POST(request: NextRequest) {
       email, 
       password, 
       confirmPassword, 
-      agreeTerms 
+      agreeTerms,
+      maxEmployees = 5
     } = body
 
     // 입력 데이터 정화
