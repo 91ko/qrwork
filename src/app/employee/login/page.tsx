@@ -109,9 +109,10 @@ export default function EmployeeLoginPage() {
                   type="text"
                   required
                   value={companyCode}
-                  onChange={(e) => setCompanyCode(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                  onChange={(e) => setCompanyCode(e.target.value.toUpperCase())}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
                   placeholder="회사 코드를 입력하세요"
+                  style={{ color: '#111827' }}
                 />
               </div>
 
@@ -126,8 +127,9 @@ export default function EmployeeLoginPage() {
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
                   placeholder="사용자명을 입력하세요"
+                  style={{ color: '#111827' }}
                 />
               </div>
 
@@ -143,8 +145,9 @@ export default function EmployeeLoginPage() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
                     placeholder="비밀번호를 입력하세요"
+                    style={{ color: '#111827' }}
                   />
                   <button
                     type="button"
