@@ -81,6 +81,14 @@ export default function QrScanPage() {
     checkAuthStatus()
   }, [checkAuthStatus, companyCode])
 
+  const stopCamera = useCallback(() => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop())
+      setCameraStream(null)
+      setIsCameraActive(false)
+    }
+  }, [cameraStream])
+
   // 컴포넌트 언마운트 시 카메라 정리
   useEffect(() => {
     return () => {
@@ -238,14 +246,6 @@ export default function QrScanPage() {
       alert('카메라에 접근할 수 없습니다. QR 코드 데이터를 직접 입력해주세요.')
     }
   }
-
-  const stopCamera = useCallback(() => {
-    if (cameraStream) {
-      cameraStream.getTracks().forEach(track => track.stop())
-      setCameraStream(null)
-      setIsCameraActive(false)
-    }
-  }, [cameraStream])
 
   const handleLogout = () => {
     stopCamera() // 로그아웃 시 카메라도 중지
