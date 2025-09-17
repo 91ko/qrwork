@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, QrCode, Users, Clock, TrendingUp, Calendar, User, BarChart3 } from 'lucide-react'
+import { ArrowRight, QrCode, Users, Clock, TrendingUp, Calendar, User, BarChart3, FileText } from 'lucide-react'
 import Header from '@/components/Header'
 
 export default function HomePage() {
@@ -54,7 +54,7 @@ export default function HomePage() {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
               <div className="text-center p-6">
                 <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <QrCode className="h-8 w-8 text-blue-600" />
@@ -92,6 +92,16 @@ export default function HomePage() {
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">분석 및 통계</h3>
                 <p className="text-gray-600">
                   출퇴근 패턴 분석과 상세한 통계 리포트를 제공합니다.
+                </p>
+              </div>
+              
+              <div className="text-center p-6">
+                <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FileText className="h-8 w-8 text-indigo-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">전자근로계약서</h3>
+                <p className="text-gray-600">
+                  디지털 근로계약서 작성, 전송, 승인을 온라인으로 처리합니다.
                 </p>
               </div>
             </div>
@@ -256,6 +266,16 @@ export default function HomePage() {
                         <p className="text-gray-600">출퇴근 기록 수정, 삭제 및 상세 조회</p>
                       </div>
                     </div>
+                    
+                    <div className="flex items-start">
+                      <div className="bg-indigo-100 p-2 rounded-lg mr-4">
+                        <FileText className="h-6 w-6 text-indigo-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">전자근로계약서 <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">유료기능</span></h4>
+                        <p className="text-gray-600">표준 근로계약서 작성, 직원 전송, 디지털 서명 및 승인 관리</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
@@ -266,6 +286,7 @@ export default function HomePage() {
                     <li>• 5인 미만 회사는 평생무료로 이용 가능</li>
                     <li>• 커스텀 필드로 부서, 직급 등 추가 정보 관리</li>
                     <li>• 연차 관리 기능으로 휴가 신청 및 승인 처리</li>
+                    <li>• 전자근로계약서로 디지털 채용 프로세스 완성</li>
                   </ul>
                 </div>
               </div>
@@ -315,6 +336,153 @@ export default function HomePage() {
                 <p className="text-gray-600">
                   직원들이 QR 코드를 스캔하여 출퇴근하고, 실시간으로 현황을 확인합니다.
                 </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Electronic Contract Section */}
+        <section className="py-20 bg-gradient-to-r from-indigo-50 to-purple-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                전자근로계약서 시스템
+              </h2>
+              <p className="text-xl text-gray-600 mb-4">
+                디지털 채용 프로세스의 완성
+              </p>
+              <div className="inline-flex items-center bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-medium">
+                <span className="mr-2">💎</span>
+                유료 기능 - 5인 이상 회사 전용
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              {/* Contract Process */}
+              <div className="space-y-6">
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <div className="flex items-center mb-4">
+                    <div className="bg-indigo-100 p-3 rounded-lg mr-4">
+                      <FileText className="h-8 w-8 text-indigo-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">근로계약서 작성</h3>
+                      <p className="text-gray-600">표준 근로계약서 템플릿 제공</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="bg-green-100 p-1 rounded-full mr-3">
+                        <span className="text-green-600 font-bold text-xs">✓</span>
+                      </div>
+                      <span>근로조건 명시 (급여, 근무시간, 휴가 등)</span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="bg-green-100 p-1 rounded-full mr-3">
+                        <span className="text-green-600 font-bold text-xs">✓</span>
+                      </div>
+                      <span>회사별 맞춤 조항 추가 가능</span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="bg-green-100 p-1 rounded-full mr-3">
+                        <span className="text-green-600 font-bold text-xs">✓</span>
+                      </div>
+                      <span>법적 요구사항 자동 검증</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <div className="flex items-center mb-4">
+                    <div className="bg-blue-100 p-3 rounded-lg mr-4">
+                      <Users className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">직원 전송 및 승인</h3>
+                      <p className="text-gray-600">디지털 서명 및 승인 프로세스</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="bg-blue-100 p-1 rounded-full mr-3">
+                        <span className="text-blue-600 font-bold text-xs">1</span>
+                      </div>
+                      <span>관리자가 근로계약서를 직원에게 전송</span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="bg-blue-100 p-1 rounded-full mr-3">
+                        <span className="text-blue-600 font-bold text-xs">2</span>
+                      </div>
+                      <span>직원이 내용 검토 후 디지털 서명</span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="bg-blue-100 p-1 rounded-full mr-3">
+                        <span className="text-blue-600 font-bold text-xs">3</span>
+                      </div>
+                      <span>관리자 최종 승인으로 계약 완료</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Benefits */}
+              <div className="space-y-8">
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6">주요 장점</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start">
+                      <div className="bg-green-100 p-2 rounded-lg mr-4">
+                        <span className="text-green-600 font-bold">⚡</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">빠른 처리</h4>
+                        <p className="text-gray-600">종이 문서 없이 즉시 계약서 작성 및 승인</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start">
+                      <div className="bg-blue-100 p-2 rounded-lg mr-4">
+                        <span className="text-blue-600 font-bold">🔒</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">보안성</h4>
+                        <p className="text-gray-600">디지털 서명과 암호화로 안전한 계약 관리</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start">
+                      <div className="bg-purple-100 p-2 rounded-lg mr-4">
+                        <span className="text-purple-600 font-bold">📊</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">추적 가능</h4>
+                        <p className="text-gray-600">계약서 상태와 승인 과정을 실시간으로 추적</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start">
+                      <div className="bg-orange-100 p-2 rounded-lg mr-4">
+                        <span className="text-orange-600 font-bold">💾</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">자동 저장</h4>
+                        <p className="text-gray-600">완료된 계약서 자동 저장 및 아카이브</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-indigo-50 rounded-lg p-6">
+                  <h4 className="font-semibold text-indigo-900 mb-2">💼 비즈니스 가치</h4>
+                  <ul className="text-indigo-800 text-sm space-y-1">
+                    <li>• 채용 프로세스 시간 단축 (50% 이상)</li>
+                    <li>• 종이 문서 비용 절약</li>
+                    <li>• 법적 리스크 최소화</li>
+                    <li>• 직원 온보딩 경험 향상</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
