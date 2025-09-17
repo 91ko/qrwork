@@ -162,6 +162,19 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // 연차 정보 생성 (기본 0일로 설정, 관리자가 나중에 부여)
+    const currentYear = new Date().getFullYear()
+    await prisma.employeeLeave.create({
+      data: {
+        employeeId: employee.id,
+        companyId: String(admin.companyId),
+        year: currentYear,
+        totalDays: 0, // 관리자가 부여할 때까지 0일
+        usedDays: 0,
+        remainingDays: 0
+      }
+    })
+
     const response = NextResponse.json({
       message: '직원이 성공적으로 등록되었습니다.',
       employee: employee

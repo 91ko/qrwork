@@ -47,9 +47,9 @@ export async function GET(request: NextRequest) {
           employeeId: employee.employeeId,
           companyId: employee.companyId,
           year: currentYear,
-          totalDays: 15, // 기본 15일
+          totalDays: 0, // 관리자가 부여할 때까지 0일
           usedDays: 0,
-          remainingDays: 15
+          remainingDays: 0
         }
       })
     }

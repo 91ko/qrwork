@@ -12,7 +12,8 @@ import {
   Search,
   ArrowLeft,
   LogOut,
-  XCircle
+  XCircle,
+  Calendar
 } from 'lucide-react'
 
 interface Employee {
@@ -49,6 +50,10 @@ export default function EmployeeManagementPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isEditLoading, setIsEditLoading] = useState(false)
   const [editError, setEditError] = useState('')
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
+  const [leaveDays, setLeaveDays] = useState(0)
+  const [isLeaveLoading, setIsLeaveLoading] = useState(false)
 
   const checkAuthStatus = useCallback(async () => {
     try {

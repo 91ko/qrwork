@@ -36,6 +36,8 @@ export default function QrScanPage() {
   const [isQrScanned, setIsQrScanned] = useState(false)
   const [scannedQrData, setScannedQrData] = useState<any>(null)
   const [nextAttendanceType, setNextAttendanceType] = useState<'CHECK_IN' | 'CHECK_OUT'>('CHECK_IN')
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
+  const [isCameraActive, setIsCameraActive] = useState(false)
 
   const checkAuthStatus = useCallback(async () => {
     try {
@@ -78,6 +80,13 @@ export default function QrScanPage() {
     
     checkAuthStatus()
   }, [checkAuthStatus, companyCode])
+
+  // 컴포넌트 언마운트 시 카메라 정리
+  useEffect(() => {
+    return () => {
+      stopCamera()
+    }
+  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -217,7 +226,29 @@ export default function QrScanPage() {
   }
 
 
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' } 
+      })
+      setCameraStream(stream)
+      setIsCameraActive(true)
+    } catch (error) {
+      console.error('카메라 접근 에러:', error)
+      alert('카메라에 접근할 수 없습니다. QR 코드 데이터를 직접 입력해주세요.')
+    }
+  }
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop())
+      setCameraStream(null)
+      setIsCameraActive(false)
+    }
+  }
+
   const handleLogout = () => {
+    stopCamera() // 로그아웃 시 카메라도 중지
     document.cookie = 'employee-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
     setIsAuthenticated(false)
     setEmployee(null)
@@ -547,36 +578,52 @@ export default function QrScanPage() {
               {/* Camera Section */}
               <div className="mb-6">
                 <div className="bg-gray-100 rounded-lg p-8 mb-4">
-                  <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 mb-4">카메라로 QR 코드를 스캔하세요</p>
-                  <button
-                    onClick={async () => {
-                      try {
-                        // 카메라 접근 시도
-                        const stream = await navigator.mediaDevices.getUserMedia({ 
-                          video: { facingMode: 'environment' } 
-                        })
-                        
-                        // 카메라 스트림을 비디오 요소에 연결
-                        const video = document.createElement('video')
-                        video.srcObject = stream
-                        video.play()
-                        
-                        // QR 코드 스캔 시뮬레이션 (실제로는 QR 스캔 라이브러리 필요)
-                        alert('카메라가 열렸습니다! QR 코드를 비디오에 비춰주세요.\n\n현재는 데모 모드입니다. 실제 QR 코드 데이터를 입력해주세요.')
-                        
-                        // 스트림 정리
-                        stream.getTracks().forEach(track => track.stop())
-                      } catch (error) {
-                        console.error('카메라 접근 에러:', error)
-                        alert('카메라에 접근할 수 없습니다. QR 코드 데이터를 직접 입력해주세요.')
-                      }
-                    }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium"
-                  >
-                    <Camera className="h-5 w-5 mr-2 inline" />
-                    카메라 열기
-                  </button>
+                  {!isCameraActive ? (
+                    <>
+                      <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600 mb-4">카메라로 QR 코드를 스캔하세요</p>
+                      <button
+                        onClick={startCamera}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium"
+                      >
+                        <Camera className="h-5 w-5 mr-2 inline" />
+                        카메라 열기
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="relative bg-black rounded-lg overflow-hidden mb-4">
+                        <video
+                          ref={(video) => {
+                            if (video && cameraStream) {
+                              video.srcObject = cameraStream
+                              video.play()
+                            }
+                          }}
+                          className="w-full h-64 object-cover"
+                          autoPlay
+                          playsInline
+                          muted
+                        />
+                        <div className="absolute inset-0 border-2 border-blue-500 rounded-lg pointer-events-none">
+                          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 border-2 border-white rounded-lg">
+                            <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl-lg"></div>
+                            <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-white rounded-tr-lg"></div>
+                            <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-white rounded-bl-lg"></div>
+                            <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-white rounded-br-lg"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-gray-600 mb-4">QR 코드를 카메라에 비춰주세요</p>
+                      <button
+                        onClick={stopCamera}
+                        className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium"
+                      >
+                        <Camera className="h-5 w-5 mr-2 inline" />
+                        카메라 닫기
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
               
@@ -595,6 +642,7 @@ export default function QrScanPage() {
               <div className="flex gap-3">
                 <button
                   onClick={() => {
+                    stopCamera()
                     setShowQrScanner(false)
                     setQrScanResult('')
                   }}
