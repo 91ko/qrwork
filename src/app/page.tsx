@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, QrCode, Users, Clock, TrendingUp, Calendar, User, BarChart3, FileText } from 'lucide-react'
+import { ArrowRight, QrCode, Users, Clock, TrendingUp, Calendar, User, BarChart3, FileText, Radio } from 'lucide-react'
 import Header from '@/components/Header'
 
 export default function HomePage() {
@@ -19,10 +19,11 @@ export default function HomePage() {
               출퇴근 관리
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              QR워크는 QR 코드를 활용한 출퇴근 관리 시스템입니다. 
+              QR워크는 QR 코드와 Beacon을 활용한 출퇴근 관리 시스템입니다. 
               회사별로 독립적인 환경을 제공하며, 모든 기능을 완전 무료로 이용할 수 있습니다.<br/>
               <span className="text-green-600 font-semibold">🎉 모든 기능 완전 무료!</span><br/>
-              <span className="text-blue-600 font-semibold">🔒 회사 거리 설정 가능 (기본 150미터)</span>
+              <span className="text-blue-600 font-semibold">🔒 회사 거리 설정 가능 (기본 150미터)</span><br/>
+              <span className="text-purple-600 font-semibold">📡 QR 코드 또는 Beacon 방식 선택 가능</span>
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -55,7 +56,7 @@ export default function HomePage() {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
               <div className="text-center p-6">
                 <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <QrCode className="h-8 w-8 text-blue-600" />
@@ -64,6 +65,17 @@ export default function HomePage() {
                 <p className="text-gray-600">
                   간편한 QR 코드 스캔으로 출퇴근을 기록하고 관리합니다.<br/>
                   <span className="text-sm text-blue-600 font-medium">🔒 회사 거리 설정 가능 (기본 150미터)</span>
+                </p>
+              </div>
+              
+              <div className="text-center p-6">
+                <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Radio className="h-8 w-8 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Beacon 시스템</h3>
+                <p className="text-gray-600">
+                  자동 Beacon 감지로 무인 출퇴근을 기록하고 관리합니다.<br/>
+                  <span className="text-sm text-purple-600 font-medium">📡 자동 감지로 편리한 출퇴근</span>
                 </p>
               </div>
               
@@ -217,6 +229,17 @@ export default function HomePage() {
                     </div>
                     
                     <div className="flex items-start">
+                      <div className="bg-purple-100 p-2 rounded-lg mr-4">
+                        <Radio className="h-6 w-6 text-purple-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Beacon 자동 출퇴근</h4>
+                        <p className="text-gray-600">Beacon 신호 자동 감지로 무인 출퇴근 기록</p>
+                        <p className="text-sm text-purple-600 font-medium">📡 자동 감지로 편리한 출퇴근</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start">
                       <div className="bg-green-100 p-2 rounded-lg mr-4">
                         <Users className="h-6 w-6 text-green-600" />
                       </div>
@@ -292,11 +315,13 @@ export default function HomePage() {
                   <h4 className="font-semibold text-blue-900 mb-2">💡 사용 팁</h4>
                   <ul className="text-blue-800 text-sm space-y-1">
                     <li>• QR 코드는 관리자가 생성하여 직원들에게 배포</li>
+                    <li>• Beacon은 관리자가 설치하여 자동 출퇴근 설정</li>
                     <li>• 모든 기능을 완전 무료로 이용 가능</li>
                     <li>• 커스텀 필드로 부서, 직급 등 추가 정보 관리</li>
                     <li>• 연차 관리 기능으로 휴가 신청 및 승인 처리</li>
                     <li>• 전자근로계약서로 디지털 채용 프로세스 완성</li>
                     <li>• 🔒 위치 기반 보안: 회사 거리 설정 가능 (기본 150미터)</li>
+                    <li>• 📡 QR 코드 또는 Beacon 방식 중 선택 가능</li>
                   </ul>
                 </div>
               </div>
@@ -346,6 +371,262 @@ export default function HomePage() {
                 <p className="text-gray-600">
                   직원들이 QR 코드를 스캔하여 출퇴근하고, 실시간으로 현황을 확인합니다.
                 </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Attendance Methods Section */}
+        <section className="py-20 bg-gradient-to-r from-blue-50 to-purple-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                출퇴근 방식 선택
+              </h2>
+              <p className="text-xl text-gray-600 mb-4">
+                QR 코드와 Beacon 중에서 회사에 맞는 방식 선택
+              </p>
+              <div className="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
+                <span className="mr-2">🎯</span>
+                관리자가 원하는 방식으로 설정 가능
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              {/* QR Code Method */}
+              <div className="bg-white rounded-lg shadow-lg p-8">
+                <div className="text-center mb-6">
+                  <div className="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <QrCode className="h-10 w-10 text-blue-600" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">QR 코드 방식</h3>
+                  <p className="text-gray-600">GPS 기반 위치 확인 + QR 코드 스캔</p>
+                </div>
+                
+                {/* Visual Diagram */}
+                <div className="bg-gray-50 rounded-lg p-6 mb-6">
+                  <div className="text-center mb-4">
+                    <h4 className="font-semibold text-gray-900 mb-2">📍 GPS 기반 출퇴근 과정</h4>
+                  </div>
+                  
+                  {/* GPS Location Visual */}
+                  <div className="relative mb-4">
+                    <div className="bg-blue-100 rounded-lg p-4 text-center">
+                      <div className="text-2xl mb-2">🏢</div>
+                      <div className="text-sm font-medium text-blue-800">회사 위치</div>
+                      <div className="text-xs text-blue-600">GPS 좌표 확인</div>
+                    </div>
+                    
+                    {/* Distance Circle */}
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-32 h-32 border-2 border-dashed border-blue-400 rounded-full flex items-center justify-center">
+                        <div className="text-xs text-blue-600 font-medium text-center">
+                          <div>150m</div>
+                          <div>반경</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* User Position */}
+                    <div className="absolute top-2 right-2">
+                      <div className="bg-green-100 rounded-full p-2">
+                        <div className="text-lg">👤</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Process Steps */}
+                  <div className="space-y-3">
+                    <div className="flex items-center text-sm">
+                      <div className="bg-blue-100 p-1 rounded-full mr-3">
+                        <span className="text-blue-600 font-bold text-xs">1</span>
+                      </div>
+                      <span className="text-gray-700">GPS로 현재 위치 확인</span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <div className="bg-green-100 p-1 rounded-full mr-3">
+                        <span className="text-green-600 font-bold text-xs">2</span>
+                      </div>
+                      <span className="text-gray-700">회사 반경 내 위치인지 검증</span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <div className="bg-purple-100 p-1 rounded-full mr-3">
+                        <span className="text-purple-600 font-bold text-xs">3</span>
+                      </div>
+                      <span className="text-gray-700">QR 코드 스캔으로 출퇴근 기록</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Features */}
+                <div className="space-y-3">
+                  <div className="flex items-center text-sm text-gray-600">
+                    <div className="bg-green-100 p-1 rounded-full mr-3">
+                      <span className="text-green-600 font-bold text-xs">✓</span>
+                    </div>
+                    <span>정확한 위치 기반 보안</span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <div className="bg-green-100 p-1 rounded-full mr-3">
+                      <span className="text-green-600 font-bold text-xs">✓</span>
+                    </div>
+                    <span>부정 출퇴근 완전 차단</span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <div className="bg-green-100 p-1 rounded-full mr-3">
+                      <span className="text-green-600 font-bold text-xs">✓</span>
+                    </div>
+                    <span>거리 설정 가능 (기본 150m)</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Beacon Method */}
+              <div className="bg-white rounded-lg shadow-lg p-8">
+                <div className="text-center mb-6">
+                  <div className="bg-purple-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Radio className="h-10 w-10 text-purple-600" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Beacon 방식</h3>
+                  <p className="text-gray-600">자동 Beacon 신호 감지로 무인 출퇴근</p>
+                </div>
+                
+                {/* Visual Diagram */}
+                <div className="bg-gray-50 rounded-lg p-6 mb-6">
+                  <div className="text-center mb-4">
+                    <h4 className="font-semibold text-gray-900 mb-2">📡 Beacon 자동 감지 과정</h4>
+                  </div>
+                  
+                  {/* Beacon Visual */}
+                  <div className="relative mb-4">
+                    <div className="bg-purple-100 rounded-lg p-4 text-center">
+                      <div className="text-2xl mb-2">📡</div>
+                      <div className="text-sm font-medium text-purple-800">Beacon 장치</div>
+                      <div className="text-xs text-purple-600">블루투스 신호 송신</div>
+                    </div>
+                    
+                    {/* Signal Waves */}
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-24 h-24 border-2 border-purple-300 rounded-full animate-pulse"></div>
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 border-2 border-purple-400 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 border-2 border-purple-500 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
+                    </div>
+                    
+                    {/* User with Phone */}
+                    <div className="absolute top-2 right-2">
+                      <div className="bg-green-100 rounded-full p-2">
+                        <div className="text-lg">📱</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Process Steps */}
+                  <div className="space-y-3">
+                    <div className="flex items-center text-sm">
+                      <div className="bg-purple-100 p-1 rounded-full mr-3">
+                        <span className="text-purple-600 font-bold text-xs">1</span>
+                      </div>
+                      <span className="text-gray-700">Beacon 신호 자동 감지</span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <div className="bg-blue-100 p-1 rounded-full mr-3">
+                        <span className="text-blue-600 font-bold text-xs">2</span>
+                      </div>
+                      <span className="text-gray-700">신호 강도로 거리 측정</span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <div className="bg-green-100 p-1 rounded-full mr-3">
+                        <span className="text-green-600 font-bold text-xs">3</span>
+                      </div>
+                      <span className="text-gray-700">자동으로 출퇴근 기록</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Features */}
+                <div className="space-y-3">
+                  <div className="flex items-center text-sm text-gray-600">
+                    <div className="bg-green-100 p-1 rounded-full mr-3">
+                      <span className="text-green-600 font-bold text-xs">✓</span>
+                    </div>
+                    <span>완전 자동화된 출퇴근</span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <div className="bg-green-100 p-1 rounded-full mr-3">
+                      <span className="text-green-600 font-bold text-xs">✓</span>
+                    </div>
+                    <span>스마트폰 조작 불필요</span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <div className="bg-green-100 p-1 rounded-full mr-3">
+                      <span className="text-green-600 font-bold text-xs">✓</span>
+                    </div>
+                    <span>Beacon 신호 강도로 거리 측정</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Comparison Table */}
+            <div className="mt-16 bg-white rounded-lg shadow-lg p-8">
+              <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">방식별 비교</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-4 px-6 font-semibold text-gray-900">특징</th>
+                      <th className="text-center py-4 px-6 font-semibold text-blue-600">QR 코드 방식</th>
+                      <th className="text-center py-4 px-6 font-semibold text-purple-600">Beacon 방식</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    <tr>
+                      <td className="py-4 px-6 font-medium text-gray-900">보안성</td>
+                      <td className="py-4 px-6 text-center">
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">매우 높음</span>
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">높음</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-6 font-medium text-gray-900">편의성</td>
+                      <td className="py-4 px-6 text-center">
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">보통</span>
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">매우 높음</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-6 font-medium text-gray-900">설치 비용</td>
+                      <td className="py-4 px-6 text-center">
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">무료</span>
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm">Beacon 장치 필요</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-6 font-medium text-gray-900">정확도</td>
+                      <td className="py-4 px-6 text-center">
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">GPS 정확도</span>
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">신호 강도 기반</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-6 font-medium text-gray-900">사용자 조작</td>
+                      <td className="py-4 px-6 text-center">
+                        <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm">QR 스캔 필요</span>
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">자동 감지</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
