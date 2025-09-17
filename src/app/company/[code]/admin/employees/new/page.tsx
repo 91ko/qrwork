@@ -158,7 +158,13 @@ export default function NewEmployeePage() {
         credentials: 'include',
         body: JSON.stringify({
           ...formData,
-          customFields: customFields.filter(field => field.value.trim() !== '')
+          customFields: customFields.map(field => ({
+            id: field.id,
+            name: field.name,
+            value: field.value || '',
+            type: field.type,
+            showInAttendance: field.showInAttendance
+          }))
         }),
       })
 

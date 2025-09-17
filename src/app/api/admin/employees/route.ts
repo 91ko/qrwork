@@ -115,17 +115,50 @@ export async function POST(request: NextRequest) {
     // 비밀번호 해시화
     const hashedPassword = await bcrypt.hash(password, 12)
 
+    // 커스텀 필드 안전하게 처리
+    let customFieldsJson = '{}'
+    try {
+      if (customFields && Array.isArray(customFields)) {
+        // 배열인 경우 객체로 변환
+        const customFieldsObj: Record<string, string> = {}
+        customFields.forEach(field => {
+          if (field && field.name && field.value !== undefined) {
+            customFieldsObj[field.name] = String(field.value || '')
+          }
+        })
+        customFieldsJson = JSON.stringify(customFieldsObj)
+      } else if (customFields && typeof customFields === 'object') {
+        customFieldsJson = JSON.stringify(customFields)
+      } else if (typeof customFields === 'string') {
+        // 이미 JSON 문자열인 경우 검증
+        JSON.parse(customFields)
+        customFieldsJson = customFields
+      }
+    } catch (jsonError) {
+      console.error('커스텀 필드 JSON 파싱 에러:', jsonError)
+      customFieldsJson = '{}'
+    }
+
+    console.log('직원 생성 데이터:', {
+      name,
+      email: email || null,
+      phone: phone || null,
+      username,
+      customFields: customFieldsJson,
+      companyId: admin.companyId
+    })
+
     // 직원 생성
     const employee = await prisma.employee.create({
       data: {
-        name,
-        email: email || null,
-        phone: phone || null,
-        username,
+        name: String(name),
+        email: email ? String(email) : null,
+        phone: phone ? String(phone) : null,
+        username: String(username),
         password: hashedPassword,
-        customFields: customFields ? JSON.stringify(customFields) : '{}',
+        customFields: customFieldsJson,
         isActive: true,
-        companyId: admin.companyId
+        companyId: String(admin.companyId)
       }
     })
 
