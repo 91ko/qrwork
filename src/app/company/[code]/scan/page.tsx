@@ -407,23 +407,30 @@ export default function QrScanPage() {
               <Camera className="h-8 w-8 text-blue-600" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">QR 코드 스캔</h3>
-            <p className="text-gray-600 mb-6">관리자가 생성한 QR 코드를 스캔하여 출퇴근하세요</p>
+            <p className="text-gray-600 mb-6">관리자가 생성한 QR 코드를 카메라로 스캔하여 출퇴근하세요</p>
             
-            <div className="bg-gray-50 p-4 rounded-lg border-2 border-dashed border-gray-300">
-              <p className="text-sm text-gray-500 mb-2">QR 코드 데이터를 입력하세요:</p>
-              <textarea
-                value={qrScanResult}
-                onChange={(e) => setQrScanResult(e.target.value)}
-                placeholder="QR 코드를 스캔하거나 데이터를 입력하세요..."
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                rows={3}
-              />
+            <div className="flex gap-4 justify-center">
               <button
-                onClick={() => handleQrScan(qrScanResult)}
-                disabled={!qrScanResult.trim() || isLoading}
-                className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium disabled:bg-gray-400"
+                onClick={() => {
+                  setNextAttendanceType('CHECK_IN')
+                  setShowQrScanner(true)
+                }}
+                disabled={isLoading}
+                className="flex items-center bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg font-medium disabled:bg-gray-400"
               >
-                {isLoading ? '처리 중...' : 'QR 코드 스캔'}
+                <Camera className="h-5 w-5 mr-2" />
+                출근 QR 스캔
+              </button>
+              <button
+                onClick={() => {
+                  setNextAttendanceType('CHECK_OUT')
+                  setShowQrScanner(true)
+                }}
+                disabled={isLoading}
+                className="flex items-center bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-medium disabled:bg-gray-400"
+              >
+                <Camera className="h-5 w-5 mr-2" />
+                퇴근 QR 스캔
               </button>
             </div>
           </div>
@@ -527,6 +534,51 @@ export default function QrScanPage() {
           </ul>
         </div>
       </main>
+
+      {/* QR Scanner Modal */}
+      {showQrScanner && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {nextAttendanceType === 'CHECK_IN' ? '출근' : '퇴근'} QR 코드 스캔
+              </h3>
+              <p className="text-gray-600 mb-4">
+                카메라로 QR 코드를 스캔하거나 QR 코드 데이터를 입력하세요
+              </p>
+              
+              <div className="mb-4">
+                <textarea
+                  value={qrScanResult}
+                  onChange={(e) => setQrScanResult(e.target.value)}
+                  placeholder="QR 코드 데이터를 입력하세요..."
+                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  rows={3}
+                />
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowQrScanner(false)
+                    setQrScanResult('')
+                  }}
+                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={() => handleQrScan(qrScanResult)}
+                  disabled={!qrScanResult.trim() || isLoading}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md disabled:bg-gray-400"
+                >
+                  {isLoading ? '처리 중...' : '스캔'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
