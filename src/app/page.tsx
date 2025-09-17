@@ -133,23 +133,78 @@ export default function HomePage() {
                       <h3 className="font-semibold">QR 코드 스캔</h3>
                     </div>
                     <div className="bg-black rounded-lg p-4 text-center">
-                      <div className="border-2 border-white rounded-lg p-8 mb-2">
-                        <div className="grid grid-cols-3 gap-1">
-                          <div className="bg-white h-2 w-2"></div>
-                          <div className="bg-white h-2 w-2"></div>
-                          <div className="bg-white h-2 w-2"></div>
-                          <div className="bg-white h-2 w-2"></div>
-                          <div className="bg-white h-2 w-2"></div>
-                          <div className="bg-white h-2 w-2"></div>
-                          <div className="bg-white h-2 w-2"></div>
-                          <div className="bg-white h-2 w-2"></div>
-                          <div className="bg-white h-2 w-2"></div>
+                      {/* 카메라 화면 시뮬레이션 */}
+                      <div className="relative bg-gray-800 rounded-lg p-4 mb-3">
+                        {/* QR 코드 스캔 영역 */}
+                        <div className="relative mx-auto w-48 h-48 bg-white rounded-lg p-2">
+                          {/* 실제 QR 코드 패턴 */}
+                          <div className="grid grid-cols-21 gap-0.5 h-full">
+                            {/* QR 코드의 실제 패턴을 시뮬레이션 */}
+                            {Array.from({ length: 21 }, (_, row) => 
+                              Array.from({ length: 21 }, (_, col) => {
+                                // QR 코드의 특징적인 패턴 생성
+                                const isCorner = (row < 7 && col < 7) || (row < 7 && col > 13) || (row > 13 && col < 7)
+                                const isFinder = (row >= 2 && row <= 4 && col >= 2 && col <= 4) || 
+                                               (row >= 2 && row <= 4 && col >= 16 && col <= 18) || 
+                                               (row >= 16 && row <= 18 && col >= 2 && col <= 4)
+                                const isTiming = (row === 6 && col % 2 === 0) || (col === 6 && row % 2 === 0)
+                                const isData = Math.random() > 0.5
+                                
+                                const shouldShow = isCorner || isFinder || isTiming || isData
+                                
+                                return (
+                                  <div 
+                                    key={`${row}-${col}`}
+                                    className={`h-1 w-1 ${shouldShow ? 'bg-black' : 'bg-white'}`}
+                                  />
+                                )
+                              })
+                            )}
+                          </div>
+                          
+                          {/* 스캔 라인 애니메이션 */}
+                          <div className="absolute inset-0 pointer-events-none">
+                            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-green-400 animate-pulse"></div>
+                          </div>
+                        </div>
+                        
+                        {/* 스캔 가이드 */}
+                        <div className="absolute inset-0 border-2 border-green-400 rounded-lg pointer-events-none">
+                          <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-green-400 rounded-tl-lg"></div>
+                          <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-green-400 rounded-tr-lg"></div>
+                          <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-green-400 rounded-bl-lg"></div>
+                          <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-green-400 rounded-br-lg"></div>
                         </div>
                       </div>
-                      <p className="text-white text-sm">QR 코드를 카메라에 비춰주세요</p>
+                      
+                      <div className="text-white text-sm space-y-1">
+                        <p className="font-semibold">📱 QR 코드를 카메라에 비춰주세요</p>
+                        <p className="text-xs text-gray-300">자동으로 출퇴근이 기록됩니다</p>
+                      </div>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600">간편한 카메라 스캔으로 출퇴근 기록</p>
+                  
+                  {/* QR 스캔 과정 설명 */}
+                  <div className="space-y-3">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="bg-blue-100 p-1 rounded-full mr-3">
+                        <span className="text-blue-600 font-bold text-xs">1</span>
+                      </div>
+                      <span>관리자가 생성한 QR 코드를 받습니다</span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="bg-green-100 p-1 rounded-full mr-3">
+                        <span className="text-green-600 font-bold text-xs">2</span>
+                      </div>
+                      <span>스마트폰 카메라로 QR 코드를 스캔합니다</span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="bg-purple-100 p-1 rounded-full mr-3">
+                        <span className="text-purple-600 font-bold text-xs">3</span>
+                      </div>
+                      <span>출근/퇴근 버튼을 눌러 기록을 완료합니다</span>
+                    </div>
+                  </div>
                 </div>
               </div>
               
