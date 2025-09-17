@@ -93,7 +93,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     checkAuthStatus()
-  }, [checkAuthStatus])
+  }, [companyCode, router])
 
   const handleCompanyFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCompanyForm({

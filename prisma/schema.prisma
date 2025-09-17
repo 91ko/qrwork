@@ -54,6 +54,7 @@ model Company {
   subscriptions CompanySubscription[]
   payments      Payment[]
   inquiries     Inquiry[]
+  employmentContracts EmploymentContract[]
 
   @@map("companies")
 }
@@ -129,6 +130,7 @@ model Admin {
   companyId String
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   inquiries Inquiry[]
+  employmentContracts EmploymentContract[]
 
   @@unique([email, companyId])
   @@map("admins")
@@ -154,6 +156,7 @@ model Employee {
   leaveRequests LeaveRequest[]
   employeeLeaves EmployeeLeave[]
   inquiries Inquiry[]
+  employmentContracts EmploymentContract[]
 
   @@unique([username, companyId])
   @@map("employees")
@@ -280,4 +283,28 @@ model Inquiry {
   employee    Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@map("inquiries")
+}
+
+// 전자 근로계약서 모델
+model EmploymentContract {
+  id              String   @id @default(cuid())
+  title           String   // 계약서 제목
+  content         String   // 계약서 내용 (HTML 또는 텍스트)
+  status          String   @default("DRAFT") // "DRAFT", "SENT", "SIGNED", "REJECTED"
+  sentAt          DateTime? // 전송일
+  signedAt        DateTime? // 서명일
+  rejectedAt      DateTime? // 거부일
+  rejectionReason String?   // 거부 사유
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // 관계
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeeId  String
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdById String   // 생성한 관리자 ID
+  createdBy   Admin    @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@map("employment_contracts")
 }

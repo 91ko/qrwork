@@ -258,7 +258,7 @@ export default function SuperAdminDashboard() {
   }
 
   const handleAutoApprove = async () => {
-    if (!confirm('14일이 지난 회사들을 자동으로 만료 처리하시겠습니까?')) {
+    if (!confirm('3개월이 지난 회사들을 자동으로 만료 처리하시겠습니까?')) {
       return
     }
 
@@ -621,6 +621,12 @@ export default function SuperAdminDashboard() {
       return <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">승인 대기</span>
     }
     
+    // 5인 미만은 평생무료
+    if (company.maxEmployees <= 5) {
+      return <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">평생무료</span>
+    }
+    
+    // 5인 이상은 3개월 체험 후 유료
     if (company.isTrialExpired && !company.subscriptionEndDate) {
       return <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">체험 만료</span>
     }
@@ -629,7 +635,7 @@ export default function SuperAdminDashboard() {
       return <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">구독 만료</span>
     }
     
-    return <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">활성</span>
+    return <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">체험 중</span>
   }
 
   if (isLoading) {
@@ -766,7 +772,7 @@ export default function SuperAdminDashboard() {
                   className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-md text-sm font-medium flex items-center"
                 >
                   <Clock className="h-4 w-4 mr-1" />
-                  14일 만료 처리
+                  3개월 만료 처리
                 </button>
                 <button
                   onClick={() => loadDashboardData(1)}
@@ -931,7 +937,11 @@ export default function SuperAdminDashboard() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getStatusBadge(company)}
                         <div className="text-xs text-gray-500 mt-1">
-                          체험: {new Date(company.trialEndDate).toLocaleDateString('ko-KR')}
+                          {company.maxEmployees <= 5 ? (
+                            <span className="text-green-600">평생무료</span>
+                          ) : (
+                            <>체험: {new Date(company.trialEndDate).toLocaleDateString('ko-KR')}</>
+                          )}
                         </div>
                         {company.subscriptionEndDate && (
                           <div className="text-xs text-gray-500">
@@ -958,12 +968,22 @@ export default function SuperAdminDashboard() {
                           >
                             상세
                           </button>
-                          <button
-                            onClick={() => handleOpenSubscriptionModal(company.id)}
-                            className="text-purple-600 hover:text-purple-900 text-xs bg-purple-50 px-2 py-1 rounded"
-                          >
-                            구독관리
-                          </button>
+                          {company.maxEmployees > 5 && (
+                            <button
+                              onClick={() => handleOpenSubscriptionModal(company.id)}
+                              className="text-purple-600 hover:text-purple-900 text-xs bg-purple-50 px-2 py-1 rounded"
+                            >
+                              구독관리
+                            </button>
+                          )}
+                          {company.maxEmployees > 5 && company.isTrialExpired && !company.subscriptionEndDate && (
+                            <button
+                              onClick={() => window.open('/contact?type=PAID_PLAN&company=' + company.code, '_blank')}
+                              className="text-orange-600 hover:text-orange-900 text-xs bg-orange-50 px-2 py-1 rounded"
+                            >
+                              유료플랜 문의
+                            </button>
+                          )}
                           {!company.isApproved ? (
                             <>
                               <button
@@ -1378,6 +1398,8 @@ export default function SuperAdminDashboard() {
                     <option value="TECHNICAL">기술</option>
                     <option value="BILLING">결제</option>
                     <option value="ACCOUNT">계정</option>
+                    <option value="PAID_PLAN">유료플랜</option>
+                    <option value="EMPLOYMENT_CONTRACT">근로계약서</option>
                     <option value="OTHER">기타</option>
                   </select>
                 </div>
@@ -1467,12 +1489,16 @@ export default function SuperAdminDashboard() {
                               inquiry.type === 'TECHNICAL' ? 'bg-blue-100 text-blue-800' :
                               inquiry.type === 'BILLING' ? 'bg-green-100 text-green-800' :
                               inquiry.type === 'ACCOUNT' ? 'bg-purple-100 text-purple-800' :
+                              inquiry.type === 'PAID_PLAN' ? 'bg-orange-100 text-orange-800' :
+                              inquiry.type === 'EMPLOYMENT_CONTRACT' ? 'bg-indigo-100 text-indigo-800' :
                               'bg-gray-100 text-gray-800'
                             }`}>
                               {inquiry.type === 'GENERAL' ? '일반' :
                                inquiry.type === 'TECHNICAL' ? '기술' :
                                inquiry.type === 'BILLING' ? '결제' :
-                               inquiry.type === 'ACCOUNT' ? '계정' : '기타'}
+                               inquiry.type === 'ACCOUNT' ? '계정' :
+                               inquiry.type === 'PAID_PLAN' ? '유료플랜' :
+                               inquiry.type === 'EMPLOYMENT_CONTRACT' ? '근로계약서' : '기타'}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
