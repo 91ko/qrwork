@@ -86,7 +86,7 @@ export default function QrScanPage() {
     return () => {
       stopCamera()
     }
-  }, [])
+  }, [stopCamera])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({

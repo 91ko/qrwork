@@ -32,7 +32,7 @@ async function getAdminFromToken(request: NextRequest) {
 }
 
 // 직원 연차 정보 조회
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const admin = await getAdminFromToken(request)
     
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return setCorsHeaders(setSecurityHeaders(response), request)
     }
 
-    const employeeId = params.id
+    const { id: employeeId } = await params
     const currentYear = new Date().getFullYear()
 
     // 직원 연차 정보 조회
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // 직원 연차 부여/수정
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const admin = await getAdminFromToken(request)
     
@@ -96,7 +96,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return setCorsHeaders(setSecurityHeaders(response), request)
     }
 
-    const employeeId = params.id
+    const { id: employeeId } = await params
     const { totalDays } = await request.json()
 
     if (typeof totalDays !== 'number' || totalDays < 0) {
