@@ -538,16 +538,51 @@ export default function QrScanPage() {
       {/* QR Scanner Modal */}
       {showQrScanner && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
             <div className="text-center">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 {nextAttendanceType === 'CHECK_IN' ? '출근' : '퇴근'} QR 코드 스캔
               </h3>
-              <p className="text-gray-600 mb-4">
-                카메라로 QR 코드를 스캔하거나 QR 코드 데이터를 입력하세요
-              </p>
               
+              {/* Camera Section */}
+              <div className="mb-6">
+                <div className="bg-gray-100 rounded-lg p-8 mb-4">
+                  <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 mb-4">카메라로 QR 코드를 스캔하세요</p>
+                  <button
+                    onClick={async () => {
+                      try {
+                        // 카메라 접근 시도
+                        const stream = await navigator.mediaDevices.getUserMedia({ 
+                          video: { facingMode: 'environment' } 
+                        })
+                        
+                        // 카메라 스트림을 비디오 요소에 연결
+                        const video = document.createElement('video')
+                        video.srcObject = stream
+                        video.play()
+                        
+                        // QR 코드 스캔 시뮬레이션 (실제로는 QR 스캔 라이브러리 필요)
+                        alert('카메라가 열렸습니다! QR 코드를 비디오에 비춰주세요.\n\n현재는 데모 모드입니다. 실제 QR 코드 데이터를 입력해주세요.')
+                        
+                        // 스트림 정리
+                        stream.getTracks().forEach(track => track.stop())
+                      } catch (error) {
+                        console.error('카메라 접근 에러:', error)
+                        alert('카메라에 접근할 수 없습니다. QR 코드 데이터를 직접 입력해주세요.')
+                      }
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium"
+                  >
+                    <Camera className="h-5 w-5 mr-2 inline" />
+                    카메라 열기
+                  </button>
+                </div>
+              </div>
+              
+              {/* Manual Input Section */}
               <div className="mb-4">
+                <p className="text-sm text-gray-500 mb-2">또는 QR 코드 데이터를 직접 입력하세요:</p>
                 <textarea
                   value={qrScanResult}
                   onChange={(e) => setQrScanResult(e.target.value)}
