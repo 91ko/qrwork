@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { 
@@ -57,8 +57,9 @@ export default function EmployeeProfilePage() {
     confirmPassword: ''
   })
 
-  const checkAuthStatus = useCallback(async () => {
+  const checkAuthStatus = async () => {
     try {
+      setIsLoading(true)
       const response = await fetch('/api/employee/auth/me', {
         method: 'GET',
         credentials: 'include'
@@ -83,8 +84,10 @@ export default function EmployeeProfilePage() {
     } catch (error) {
       console.error('인증 확인 에러:', error)
       router.push(`/company/${companyCode}/scan`)
+    } finally {
+      setIsLoading(false)
     }
-  }, [companyCode, router])
+  }
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -198,7 +201,7 @@ export default function EmployeeProfilePage() {
 
   useEffect(() => {
     checkAuthStatus()
-  }, [checkAuthStatus])
+  }, [])
 
   if (isLoading) {
     return (
