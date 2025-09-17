@@ -21,7 +21,8 @@ export default function HomePage() {
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               QR워크는 QR 코드를 활용한 출퇴근 관리 시스템입니다. 
               회사별로 독립적인 환경을 제공하며, 3개월 무료 체험으로 쉽게 시작할 수 있습니다.<br/>
-              <span className="text-green-600 font-semibold">5인 미만은 평생무료!</span>
+              <span className="text-green-600 font-semibold">5인 미만은 평생무료!</span><br/>
+              <span className="text-blue-600 font-semibold">🔒 회사 150미터 내에서만 출퇴근 가능</span>
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -61,7 +62,8 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">QR 코드 시스템</h3>
                 <p className="text-gray-600">
-                  간편한 QR 코드 스캔으로 출퇴근을 기록하고 관리합니다.
+                  간편한 QR 코드 스캔으로 출퇴근을 기록하고 관리합니다.<br/>
+                  <span className="text-sm text-blue-600 font-medium">🔒 회사 150미터 내에서만 작동</span>
                 </p>
               </div>
               
@@ -180,13 +182,19 @@ export default function HomePage() {
                       <div className="bg-green-100 p-1 rounded-full mr-3">
                         <span className="text-green-600 font-bold text-xs">2</span>
                       </div>
-                      <span>스마트폰 카메라로 QR 코드를 스캔합니다</span>
+                      <span>회사 150미터 내에서 QR 코드를 스캔합니다</span>
                     </div>
                     <div className="flex items-center text-sm text-gray-600">
                       <div className="bg-purple-100 p-1 rounded-full mr-3">
                         <span className="text-purple-600 font-bold text-xs">3</span>
                       </div>
                       <span>출근/퇴근 버튼을 눌러 기록을 완료합니다</span>
+                    </div>
+                    <div className="flex items-center text-sm text-red-600 bg-red-50 p-2 rounded-lg">
+                      <div className="bg-red-100 p-1 rounded-full mr-3">
+                        <span className="text-red-600 font-bold text-xs">🔒</span>
+                      </div>
+                      <span className="font-medium">위치 기반 보안: 회사 근처에서만 출퇴근 가능</span>
                     </div>
                   </div>
                 </div>
@@ -204,6 +212,7 @@ export default function HomePage() {
                       <div>
                         <h4 className="font-semibold text-gray-900">QR 코드 출퇴근</h4>
                         <p className="text-gray-600">스마트폰 카메라로 간편하게 출퇴근 기록</p>
+                        <p className="text-sm text-blue-600 font-medium">🔒 회사 150미터 내에서만 작동</p>
                       </div>
                     </div>
                     
@@ -287,6 +296,7 @@ export default function HomePage() {
                     <li>• 커스텀 필드로 부서, 직급 등 추가 정보 관리</li>
                     <li>• 연차 관리 기능으로 휴가 신청 및 승인 처리</li>
                     <li>• 전자근로계약서로 디지털 채용 프로세스 완성</li>
+                    <li>• 🔒 위치 기반 보안: 회사 150미터 내에서만 출퇴근 가능</li>
                   </ul>
                 </div>
               </div>
@@ -336,6 +346,153 @@ export default function HomePage() {
                 <p className="text-gray-600">
                   직원들이 QR 코드를 스캔하여 출퇴근하고, 실시간으로 현황을 확인합니다.
                 </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Security Features Section */}
+        <section className="py-20 bg-gradient-to-r from-red-50 to-orange-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                강력한 보안 시스템
+              </h2>
+              <p className="text-xl text-gray-600 mb-4">
+                위치 기반 출퇴근으로 부정 출퇴근을 완전 차단
+              </p>
+              <div className="inline-flex items-center bg-red-100 text-red-800 px-4 py-2 rounded-full text-sm font-medium">
+                <span className="mr-2">🔒</span>
+                회사 150미터 내에서만 출퇴근 가능
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              {/* Security Features */}
+              <div className="space-y-6">
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <div className="flex items-center mb-4">
+                    <div className="bg-red-100 p-3 rounded-lg mr-4">
+                      <span className="text-red-600 font-bold text-2xl">📍</span>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">위치 기반 인증</h3>
+                      <p className="text-gray-600">GPS를 활용한 정확한 위치 확인</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="bg-green-100 p-1 rounded-full mr-3">
+                        <span className="text-green-600 font-bold text-xs">✓</span>
+                      </div>
+                      <span>회사 주소 기준 150미터 반경 내에서만 작동</span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="bg-green-100 p-1 rounded-full mr-3">
+                        <span className="text-green-600 font-bold text-xs">✓</span>
+                      </div>
+                      <span>실시간 GPS 위치 확인으로 부정 출퇴근 방지</span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="bg-green-100 p-1 rounded-full mr-3">
+                        <span className="text-green-600 font-bold text-xs">✓</span>
+                      </div>
+                      <span>위치 정보가 부정확하면 출퇴근 기록 불가</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <div className="flex items-center mb-4">
+                    <div className="bg-blue-100 p-3 rounded-lg mr-4">
+                      <span className="text-blue-600 font-bold text-2xl">🛡️</span>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">부정 출퇴근 차단</h3>
+                      <p className="text-gray-600">다양한 보안 기능으로 시스템 보호</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="bg-blue-100 p-1 rounded-full mr-3">
+                        <span className="text-blue-600 font-bold text-xs">1</span>
+                      </div>
+                      <span>QR 코드는 회사별로 고유하게 생성</span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="bg-blue-100 p-1 rounded-full mr-3">
+                        <span className="text-blue-600 font-bold text-xs">2</span>
+                      </div>
+                      <span>위치 정보와 QR 코드 이중 검증</span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <div className="bg-blue-100 p-1 rounded-full mr-3">
+                        <span className="text-blue-600 font-bold text-xs">3</span>
+                      </div>
+                      <span>모든 출퇴근 기록에 위치 정보 저장</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Security Benefits */}
+              <div className="space-y-8">
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6">보안 효과</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start">
+                      <div className="bg-red-100 p-2 rounded-lg mr-4">
+                        <span className="text-red-600 font-bold">🚫</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">부정 출퇴근 완전 차단</h4>
+                        <p className="text-gray-600">집에서나 다른 장소에서의 가짜 출퇴근 기록 방지</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start">
+                      <div className="bg-green-100 p-2 rounded-lg mr-4">
+                        <span className="text-green-600 font-bold">✅</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">정확한 근무 시간 관리</h4>
+                        <p className="text-gray-600">실제 출퇴근 시간을 정확하게 기록하여 공정한 급여 계산</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start">
+                      <div className="bg-blue-100 p-2 rounded-lg mr-4">
+                        <span className="text-blue-600 font-bold">📊</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">투명한 근무 관리</h4>
+                        <p className="text-gray-600">모든 출퇴근 기록에 위치 정보가 포함되어 검증 가능</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start">
+                      <div className="bg-purple-100 p-2 rounded-lg mr-4">
+                        <span className="text-purple-600 font-bold">⚖️</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">법적 근거 확보</h4>
+                        <p className="text-gray-600">위치 정보가 포함된 출퇴근 기록으로 분쟁 시 증거 자료</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-red-50 rounded-lg p-6">
+                  <h4 className="font-semibold text-red-900 mb-2">⚠️ 보안 경고</h4>
+                  <ul className="text-red-800 text-sm space-y-1">
+                    <li>• 회사 150미터 밖에서는 출퇴근 기록 불가</li>
+                    <li>• GPS 위치 정보가 부정확하면 시스템 작동 안함</li>
+                    <li>• 모든 출퇴근 기록은 위치 정보와 함께 저장</li>
+                    <li>• 부정 출퇴근 시도는 자동으로 차단됨</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
