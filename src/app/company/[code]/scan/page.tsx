@@ -39,6 +39,23 @@ export default function QrScanPage() {
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
   const [isCameraActive, setIsCameraActive] = useState(false)
 
+  const loadData = useCallback(async () => {
+    try {
+      // 마지막 출퇴근 기록 로드
+      const response = await fetch('/api/employee/attendance/last', {
+        method: 'GET',
+        credentials: 'include'
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setLastAttendance(data.lastAttendance)
+      }
+    } catch (error) {
+      console.error('데이터 로드 에러:', error)
+    }
+  }, [])
+
   const checkAuthStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/employee/auth/me', {
@@ -52,6 +69,8 @@ export default function QrScanPage() {
           setIsAuthenticated(true)
           setEmployee(data.employee)
           setLastAttendance(data.lastAttendance)
+          // 인증 성공 후 데이터 로드
+          loadData()
         } else {
           // 다른 회사의 직원인 경우 해당 회사로 이동
           router.push(`/company/${data.employee.company.code}/scan`)

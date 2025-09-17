@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, QrCode, Users, Clock, TrendingUp } from 'lucide-react'
+import { ArrowRight, QrCode, Users, Clock, TrendingUp, Calendar, User, BarChart3 } from 'lucide-react'
 import Header from '@/components/Header'
 
 export default function HomePage() {
@@ -133,47 +133,21 @@ export default function HomePage() {
                       <h3 className="font-semibold">QR 코드 스캔</h3>
                     </div>
                     <div className="bg-black rounded-lg p-4 text-center">
-                      {/* 카메라 화면 시뮬레이션 */}
-                      <div className="relative bg-gray-800 rounded-lg p-4 mb-3">
-                        {/* QR 코드 스캔 영역 */}
-                        <div className="relative mx-auto w-48 h-48 bg-white rounded-lg p-2">
-                          {/* 실제 QR 코드 패턴 */}
-                          <div className="grid grid-cols-21 gap-0.5 h-full">
-                            {/* QR 코드의 실제 패턴을 시뮬레이션 */}
-                            {Array.from({ length: 21 }, (_, row) => 
-                              Array.from({ length: 21 }, (_, col) => {
-                                // QR 코드의 특징적인 패턴 생성
-                                const isCorner = (row < 7 && col < 7) || (row < 7 && col > 13) || (row > 13 && col < 7)
-                                const isFinder = (row >= 2 && row <= 4 && col >= 2 && col <= 4) || 
-                                               (row >= 2 && row <= 4 && col >= 16 && col <= 18) || 
-                                               (row >= 16 && row <= 18 && col >= 2 && col <= 4)
-                                const isTiming = (row === 6 && col % 2 === 0) || (col === 6 && row % 2 === 0)
-                                const isData = Math.random() > 0.5
-                                
-                                const shouldShow = isCorner || isFinder || isTiming || isData
-                                
-                                return (
-                                  <div 
-                                    key={`${row}-${col}`}
-                                    className={`h-1 w-1 ${shouldShow ? 'bg-black' : 'bg-white'}`}
-                                  />
-                                )
-                              })
-                            )}
-                          </div>
-                          
-                          {/* 스캔 라인 애니메이션 */}
-                          <div className="absolute inset-0 pointer-events-none">
-                            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-green-400 animate-pulse"></div>
-                          </div>
+                      {/* 간단한 QR 코드 모양 */}
+                      <div className="relative mx-auto w-32 h-32 bg-white rounded-lg p-3 mb-3">
+                        {/* QR 코드 패턴 - 간단한 버전 */}
+                        <div className="grid grid-cols-8 gap-1 h-full">
+                          {Array.from({ length: 64 }, (_, i) => (
+                            <div 
+                              key={i}
+                              className={`h-3 w-3 ${Math.random() > 0.5 ? 'bg-black' : 'bg-white'} rounded-sm`}
+                            />
+                          ))}
                         </div>
                         
-                        {/* 스캔 가이드 */}
-                        <div className="absolute inset-0 border-2 border-green-400 rounded-lg pointer-events-none">
-                          <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-green-400 rounded-tl-lg"></div>
-                          <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-green-400 rounded-tr-lg"></div>
-                          <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-green-400 rounded-bl-lg"></div>
-                          <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-green-400 rounded-br-lg"></div>
+                        {/* 스캔 라인 애니메이션 */}
+                        <div className="absolute inset-0 pointer-events-none">
+                          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-green-400 animate-pulse"></div>
                         </div>
                       </div>
                       
@@ -250,6 +224,36 @@ export default function HomePage() {
                       <div>
                         <h4 className="font-semibold text-gray-900">통계 및 분석</h4>
                         <p className="text-gray-600">출퇴근 패턴 분석과 상세한 통계 리포트</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start">
+                      <div className="bg-red-100 p-2 rounded-lg mr-4">
+                        <Calendar className="h-6 w-6 text-red-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">연차 관리</h4>
+                        <p className="text-gray-600">직원별 연차 부여 및 휴가 신청 승인 관리</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start">
+                      <div className="bg-indigo-100 p-2 rounded-lg mr-4">
+                        <User className="h-6 w-6 text-indigo-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">커스텀 필드</h4>
+                        <p className="text-gray-600">부서, 직급, 사번 등 회사별 맞춤 정보 관리</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start">
+                      <div className="bg-pink-100 p-2 rounded-lg mr-4">
+                        <BarChart3 className="h-6 w-6 text-pink-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">출퇴근 기록 관리</h4>
+                        <p className="text-gray-600">출퇴근 기록 수정, 삭제 및 상세 조회</p>
                       </div>
                     </div>
                   </div>

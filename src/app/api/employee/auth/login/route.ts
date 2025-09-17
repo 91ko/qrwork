@@ -54,10 +54,13 @@ export async function POST(request: NextRequest) {
       return setCorsHeaders(setSecurityHeaders(response), request)
     }
 
-    // 직원 확인
+    // 직원 확인 (대소문자 구분 없이)
     const employee = await prisma.employee.findFirst({
       where: {
-        username: username,
+        username: {
+          equals: username,
+          mode: 'insensitive'
+        },
         companyId: company.id,
         isActive: true
       },
