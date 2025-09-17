@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
-import prisma from '@/lib/prisma'
+import { getPrismaClient } from '@/lib/db-security'
+import { setCorsHeaders, setSecurityHeaders } from '@/lib/security-middleware'
+
+// Prisma 클라이언트 인스턴스 생성
+const prisma = getPrismaClient()
+
+// OPTIONS 요청 처리 (CORS preflight)
+export async function OPTIONS(request: NextRequest) {
+  const response = new NextResponse(null, { status: 200 })
+  return setCorsHeaders(setSecurityHeaders(response), request)
+}
 
 // JWT 토큰에서 관리자 정보 추출
 async function getAdminFromToken(request: NextRequest) {
@@ -12,7 +22,10 @@ async function getAdminFromToken(request: NextRequest) {
       return null
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any
+    // 환경 변수에서 JWT 시크릿 가져오기 (fallback 포함)
+    const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-key-for-production'
+    
+    const decoded = jwt.verify(token, jwtSecret) as any
     return decoded
   } catch (error) {
     return null
@@ -40,16 +53,19 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       employees: employees
     })
+    
+    return setCorsHeaders(setSecurityHeaders(response), request)
 
   } catch (error) {
     console.error('직원 목록 조회 에러:', error)
-    return NextResponse.json(
+    const errorResponse = NextResponse.json(
       { message: '서버 오류가 발생했습니다.' },
       { status: 500 }
     )
+    return setCorsHeaders(setSecurityHeaders(errorResponse), request)
   } finally {
     await prisma.$disconnect()
   }
@@ -61,10 +77,11 @@ export async function POST(request: NextRequest) {
     const admin = await getAdminFromToken(request)
     
     if (!admin) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { message: '인증이 필요합니다.' },
         { status: 401 }
       )
+      return setCorsHeaders(setSecurityHeaders(response), request)
     }
 
     const body = await request.json()
@@ -72,10 +89,11 @@ export async function POST(request: NextRequest) {
 
     // 유효성 검사
     if (!name || !username || !password) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { message: '이름, 사용자 ID, 비밀번호는 필수입니다.' },
         { status: 400 }
       )
+      return setCorsHeaders(setSecurityHeaders(response), request)
     }
 
     // 사용자 ID 중복 확인
@@ -87,10 +105,11 @@ export async function POST(request: NextRequest) {
     })
 
     if (existingEmployee) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { message: '이미 사용 중인 사용자 ID입니다.' },
         { status: 400 }
       )
+      return setCorsHeaders(setSecurityHeaders(response), request)
     }
 
     // 비밀번호 해시화
@@ -110,18 +129,25 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       message: '직원이 성공적으로 등록되었습니다.',
       employee: employee
     })
+    
+    return setCorsHeaders(setSecurityHeaders(response), request)
 
   } catch (error) {
     console.error('직원 등록 에러:', error)
-    return NextResponse.json(
+    const errorResponse = NextResponse.json(
       { message: '서버 오류가 발생했습니다.' },
       { status: 500 }
     )
+    return setCorsHeaders(setSecurityHeaders(errorResponse), request)
   } finally {
-    await prisma.$disconnect()
+    try {
+      await prisma.$disconnect()
+    } catch (disconnectError) {
+      console.error('Prisma 연결 해제 에러:', disconnectError)
+    }
   }
 }
