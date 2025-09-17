@@ -157,9 +157,16 @@ export async function POST(request: NextRequest) {
     // 비밀번호 해시화
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // 무료 체험 종료일 (14일 후)
+    // 무료 체험 종료일 설정
+    // 5명 이하는 평생무료 (2099년까지), 그 외는 3개월 무료
     const trialEndDate = new Date()
-    trialEndDate.setDate(trialEndDate.getDate() + 14)
+    if (maxEmployees <= 5) {
+      // 5명 이하는 평생무료 (2099년 12월 31일)
+      trialEndDate.setFullYear(2099, 11, 31)
+    } else {
+      // 6명 이상은 3개월 무료
+      trialEndDate.setDate(trialEndDate.getDate() + 90)
+    }
 
     // 트랜잭션으로 회사와 관리자 생성
     const result = await prisma.$transaction(async (tx: any) => {

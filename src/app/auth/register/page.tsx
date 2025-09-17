@@ -14,7 +14,8 @@ export default function RegisterPage() {
     adminName: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    maxEmployees: 5
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -78,10 +79,10 @@ export default function RegisterPage() {
     }
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.name === 'maxEmployees' ? parseInt(e.target.value) : e.target.value
     })
   }
 
@@ -96,7 +97,8 @@ export default function RegisterPage() {
           </div>
           <h2 className="text-2xl font-bold text-gray-900">회사 등록</h2>
           <p className="mt-2 text-sm text-gray-600">
-            14일 무료 체험으로 QR워크를 시작해보세요
+            3개월 무료 체험으로 QR워크를 시작해보세요<br/>
+            <span className="text-green-600 font-semibold">5인 미만은 평생무료!</span>
           </p>
         </div>
 
@@ -188,6 +190,43 @@ export default function RegisterPage() {
                   placeholder="admin@company.com"
                 />
               </div>
+            </div>
+
+            {/* Max Employees */}
+            <div>
+              <label htmlFor="maxEmployees" className="block text-sm font-medium text-gray-700 mb-2">
+                예상 직원 수
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
+                <select
+                  id="maxEmployees"
+                  name="maxEmployees"
+                  value={formData.maxEmployees}
+                  onChange={handleInputChange}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value={1}>1명</option>
+                  <option value={2}>2명</option>
+                  <option value={3}>3명</option>
+                  <option value={4}>4명</option>
+                  <option value={5}>5명 (평생무료!)</option>
+                  <option value={10}>6-10명 (3개월 무료)</option>
+                  <option value={20}>11-20명 (3개월 무료)</option>
+                  <option value={50}>21-50명 (3개월 무료)</option>
+                  <option value={100}>51-100명 (3개월 무료)</option>
+                  <option value={200}>100명 이상 (3개월 무료)</option>
+                </select>
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                {formData.maxEmployees <= 5 ? (
+                  <span className="text-green-600 font-semibold">평생무료 플랜입니다!</span>
+                ) : (
+                  <span className="text-blue-600">3개월 무료 체험 후 유료 플랜으로 전환됩니다.</span>
+                )}
+              </p>
             </div>
 
             {/* Password */}
@@ -394,9 +433,23 @@ export default function RegisterPage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">플랜:</span>
+                    <span className={`text-sm font-semibold ${
+                      new Date(registeredCompany.trialEndDate).getFullYear() === 2099 
+                        ? 'text-green-600' 
+                        : 'text-blue-600'
+                    }`}>
+                      {new Date(registeredCompany.trialEndDate).getFullYear() === 2099 
+                        ? '평생무료 플랜' 
+                        : '3개월 무료 체험'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
                     <span className="text-sm text-gray-500">체험 종료일:</span>
                     <span className="text-sm text-gray-900">
-                      {new Date(registeredCompany.trialEndDate).toLocaleDateString('ko-KR')}
+                      {new Date(registeredCompany.trialEndDate).getFullYear() === 2099 
+                        ? '평생' 
+                        : new Date(registeredCompany.trialEndDate).toLocaleDateString('ko-KR')}
                     </span>
                   </div>
                 </div>

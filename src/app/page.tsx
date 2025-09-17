@@ -20,7 +20,8 @@ export default function HomePage() {
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               QR워크는 QR 코드를 활용한 출퇴근 관리 시스템입니다. 
-              회사별로 독립적인 환경을 제공하며, 14일 무료 체험으로 쉽게 시작할 수 있습니다.
+              회사별로 독립적인 환경을 제공하며, 3개월 무료 체험으로 쉽게 시작할 수 있습니다.<br/>
+              <span className="text-green-600 font-semibold">5인 미만은 평생무료!</span>
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -104,7 +105,8 @@ export default function HomePage() {
               지금 시작해보세요
             </h2>
             <p className="text-xl text-blue-100 mb-8">
-              14일 무료 체험으로 QR워크의 모든 기능을 경험해보세요
+              3개월 무료 체험으로 QR워크의 모든 기능을 경험해보세요<br/>
+              <span className="text-green-600 font-semibold">5인 미만은 평생무료!</span>
             </p>
             <Link
               href="/auth/register"
