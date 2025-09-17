@@ -22,7 +22,7 @@ export default function HomePage() {
               QR워크는 QR 코드를 활용한 출퇴근 관리 시스템입니다. 
               회사별로 독립적인 환경을 제공하며, 모든 기능을 완전 무료로 이용할 수 있습니다.<br/>
               <span className="text-green-600 font-semibold">🎉 모든 기능 완전 무료!</span><br/>
-              <span className="text-blue-600 font-semibold">🔒 회사 150미터 내에서만 출퇴근 가능</span>
+              <span className="text-blue-600 font-semibold">🔒 회사 거리 설정 가능 (기본 150미터)</span>
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -63,7 +63,7 @@ export default function HomePage() {
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">QR 코드 시스템</h3>
                 <p className="text-gray-600">
                   간편한 QR 코드 스캔으로 출퇴근을 기록하고 관리합니다.<br/>
-                  <span className="text-sm text-blue-600 font-medium">🔒 회사 150미터 내에서만 작동</span>
+                  <span className="text-sm text-blue-600 font-medium">🔒 회사 거리 설정 가능 (기본 150미터)</span>
                 </p>
               </div>
               
@@ -182,7 +182,7 @@ export default function HomePage() {
                       <div className="bg-green-100 p-1 rounded-full mr-3">
                         <span className="text-green-600 font-bold text-xs">2</span>
                       </div>
-                      <span>회사 150미터 내에서 QR 코드를 스캔합니다</span>
+                      <span>설정된 거리 내에서 QR 코드를 스캔합니다</span>
                     </div>
                     <div className="flex items-center text-sm text-gray-600">
                       <div className="bg-purple-100 p-1 rounded-full mr-3">
@@ -194,7 +194,7 @@ export default function HomePage() {
                       <div className="bg-red-100 p-1 rounded-full mr-3">
                         <span className="text-red-600 font-bold text-xs">🔒</span>
                       </div>
-                      <span className="font-medium">위치 기반 보안: 회사 근처에서만 출퇴근 가능</span>
+                      <span className="font-medium">위치 기반 보안: 설정된 거리 내에서만 출퇴근 가능</span>
                     </div>
                   </div>
                 </div>
@@ -212,7 +212,7 @@ export default function HomePage() {
                       <div>
                         <h4 className="font-semibold text-gray-900">QR 코드 출퇴근</h4>
                         <p className="text-gray-600">스마트폰 카메라로 간편하게 출퇴근 기록</p>
-                        <p className="text-sm text-blue-600 font-medium">🔒 회사 150미터 내에서만 작동</p>
+                        <p className="text-sm text-blue-600 font-medium">🔒 회사 거리 설정 가능 (기본 150미터)</p>
                       </div>
                     </div>
                     
@@ -296,7 +296,7 @@ export default function HomePage() {
                     <li>• 커스텀 필드로 부서, 직급 등 추가 정보 관리</li>
                     <li>• 연차 관리 기능으로 휴가 신청 및 승인 처리</li>
                     <li>• 전자근로계약서로 디지털 채용 프로세스 완성</li>
-                    <li>• 🔒 위치 기반 보안: 회사 150미터 내에서만 출퇴근 가능</li>
+                    <li>• 🔒 위치 기반 보안: 회사 거리 설정 가능 (기본 150미터)</li>
                   </ul>
                 </div>
               </div>
@@ -363,7 +363,7 @@ export default function HomePage() {
               </p>
               <div className="inline-flex items-center bg-red-100 text-red-800 px-4 py-2 rounded-full text-sm font-medium">
                 <span className="mr-2">🔒</span>
-                회사 150미터 내에서만 출퇴근 가능
+                회사 거리 설정 가능 (기본 150미터)
               </div>
             </div>
             
@@ -386,7 +386,7 @@ export default function HomePage() {
                       <div className="bg-green-100 p-1 rounded-full mr-3">
                         <span className="text-green-600 font-bold text-xs">✓</span>
                       </div>
-                      <span>회사 주소 기준 150미터 반경 내에서만 작동</span>
+                      <span>회사 주소 기준 설정된 거리 반경 내에서만 작동</span>
                     </div>
                     <div className="flex items-center text-sm text-gray-600">
                       <div className="bg-green-100 p-1 rounded-full mr-3">
@@ -487,7 +487,7 @@ export default function HomePage() {
                 <div className="bg-red-50 rounded-lg p-6">
                   <h4 className="font-semibold text-red-900 mb-2">⚠️ 보안 경고</h4>
                   <ul className="text-red-800 text-sm space-y-1">
-                    <li>• 회사 150미터 밖에서는 출퇴근 기록 불가</li>
+                    <li>• 설정된 거리 밖에서는 출퇴근 기록 불가</li>
                     <li>• GPS 위치 정보가 부정확하면 시스템 작동 안함</li>
                     <li>• 모든 출퇴근 기록은 위치 정보와 함께 저장</li>
                     <li>• 부정 출퇴근 시도는 자동으로 차단됨</li>
