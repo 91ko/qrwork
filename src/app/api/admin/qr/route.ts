@@ -105,6 +105,20 @@ export async function POST(request: NextRequest) {
     console.log('요청 데이터:', body)
     const { name, type, location, latitude, longitude, radius, isActive } = body
 
+    // 데이터베이스 연결 테스트
+    console.log('데이터베이스 연결 테스트 중...')
+    try {
+      await prisma.$connect()
+      console.log('데이터베이스 연결 성공')
+    } catch (dbError) {
+      console.error('데이터베이스 연결 실패:', dbError)
+      const response = NextResponse.json(
+        { message: '데이터베이스 연결에 실패했습니다.' },
+        { status: 500 }
+      )
+      return setCorsHeaders(setSecurityHeaders(response), request)
+    }
+
     // 유효성 검사
     if (!name || !type) {
       const response = NextResponse.json(
@@ -134,17 +148,28 @@ export async function POST(request: NextRequest) {
 
     // QR 코드 생성
     console.log('데이터베이스에 QR 코드 생성 시작')
+    console.log('생성할 데이터:', {
+      name,
+      type,
+      location: location || null,
+      latitude: latitude || null,
+      longitude: longitude || null,
+      radius: radius || null,
+      isActive: isActive !== undefined ? isActive : true,
+      companyId: admin.companyId
+    })
+    
     const qrCode = await prisma.qrCode.create({
       data: {
-        name,
-        type,
-        location: location || null,
-        latitude: latitude || null,
-        longitude: longitude || null,
-        radius: radius || null,
+        name: String(name),
+        type: String(type),
+        location: location ? String(location) : null,
+        latitude: latitude ? Number(latitude) : null,
+        longitude: longitude ? Number(longitude) : null,
+        radius: radius ? Number(radius) : null,
         qrData: JSON.stringify(qrData),
-        isActive: isActive !== undefined ? isActive : true,
-        companyId: admin.companyId
+        isActive: isActive !== undefined ? Boolean(isActive) : true,
+        companyId: String(admin.companyId)
       }
     })
     console.log('QR 코드 생성 완료:', qrCode.id)
@@ -156,24 +181,33 @@ export async function POST(request: NextRequest) {
     }
 
     // QR 코드 데이터 업데이트
+    console.log('QR 코드 데이터 업데이트 시작')
     await prisma.qrCode.update({
       where: { id: qrCode.id },
       data: {
         qrData: JSON.stringify(updatedQrData)
       }
     })
+    console.log('QR 코드 데이터 업데이트 완료')
 
     // QR 코드 이미지 생성
     console.log('QR 코드 이미지 생성 시작')
-    const qrImageDataURL = await QRCode.toDataURL(JSON.stringify(updatedQrData), {
-      width: 300,
-      margin: 2,
-      color: {
-        dark: '#000000',
-        light: '#FFFFFF'
-      }
-    })
-    console.log('QR 코드 이미지 생성 완료')
+    let qrImageDataURL = ''
+    try {
+      qrImageDataURL = await QRCode.toDataURL(JSON.stringify(updatedQrData), {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      })
+      console.log('QR 코드 이미지 생성 완료')
+    } catch (qrError) {
+      console.error('QR 코드 이미지 생성 실패:', qrError)
+      // 이미지 생성 실패해도 QR 코드는 생성된 상태로 응답
+      qrImageDataURL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
+    }
 
     const response = NextResponse.json({
       message: 'QR 코드가 성공적으로 생성되었습니다.',
@@ -207,5 +241,11 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
     return setCorsHeaders(setSecurityHeaders(errorResponse), request)
+  } finally {
+    try {
+      await prisma.$disconnect()
+    } catch (disconnectError) {
+      console.error('Prisma 연결 해제 에러:', disconnectError)
+    }
   }
 }
