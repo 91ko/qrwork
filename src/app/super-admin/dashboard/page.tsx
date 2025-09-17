@@ -504,6 +504,75 @@ export default function SuperAdminDashboard() {
     }
   }
 
+  const handleQuickUpgrade = async (companyId: string) => {
+    if (!confirm('이 회사를 기본 유료 플랜으로 업그레이드하시겠습니까?\n\n- 기본 플랜: 월 5만원\n- 최대 직원 수: 10명\n- 구독 기간: 1년')) {
+      return
+    }
+
+    try {
+      // 기본 플랜 ID를 찾거나 생성
+      let basicPlanId = subscriptionPlans.find(p => p.name === '기본')?.id
+      
+      if (!basicPlanId) {
+        // 기본 플랜이 없으면 생성
+        const createPlanResponse = await fetch('/api/super-admin/subscription-plans', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            name: '기본',
+            description: '소규모 팀을 위한 기본 플랜',
+            price: 50000,
+            maxEmployees: 10,
+            features: JSON.stringify(['출퇴근 관리', 'QR 코드 스캔', '기본 통계', '이메일 지원'])
+          })
+        })
+        
+        if (createPlanResponse.ok) {
+          const planData = await createPlanResponse.json()
+          basicPlanId = planData.plan.id
+        } else {
+          alert('기본 플랜 생성에 실패했습니다.')
+          return
+        }
+      }
+
+      // 구독 생성
+      const endDate = new Date()
+      endDate.setFullYear(endDate.getFullYear() + 1) // 1년 구독
+
+      const response = await fetch(`/api/super-admin/companies/${companyId}/subscription`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          planId: basicPlanId,
+          startDate: new Date().toISOString().split('T')[0],
+          endDate: endDate.toISOString().split('T')[0],
+          autoRenew: true,
+          paymentAmount: 50000,
+          paymentMethod: 'MANUAL',
+          description: '관리자 수동 유료 플랜 업그레이드'
+        })
+      })
+
+      if (response.ok) {
+        alert('회사가 성공적으로 유료 플랜으로 업그레이드되었습니다!')
+        loadDashboardData(currentPage)
+      } else {
+        const data = await response.json()
+        alert(data.message || '유료 플랜 업그레이드에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('유료 플랜 업그레이드 에러:', error)
+      alert('유료 플랜 업그레이드 중 오류가 발생했습니다.')
+    }
+  }
+
   // 문의 관련 함수들
   const loadInquiries = useCallback(async (page = 1) => {
     try {
@@ -977,12 +1046,20 @@ export default function SuperAdminDashboard() {
                             </button>
                           )}
                           {company.maxEmployees > 5 && company.isTrialExpired && !company.subscriptionEndDate && (
-                            <button
-                              onClick={() => window.open('/contact?type=PAID_PLAN&company=' + company.code, '_blank')}
-                              className="text-orange-600 hover:text-orange-900 text-xs bg-orange-50 px-2 py-1 rounded"
-                            >
-                              유료플랜 문의
-                            </button>
+                            <>
+                              <button
+                                onClick={() => handleQuickUpgrade(company.id)}
+                                className="text-green-600 hover:text-green-900 text-xs bg-green-50 px-2 py-1 rounded"
+                              >
+                                유료플랜 업그레이드
+                              </button>
+                              <button
+                                onClick={() => window.open('/contact?type=PAID_PLAN&company=' + company.code, '_blank')}
+                                className="text-orange-600 hover:text-orange-900 text-xs bg-orange-50 px-2 py-1 rounded"
+                              >
+                                문의하기
+                              </button>
+                            </>
                           )}
                           {!company.isApproved ? (
                             <>
