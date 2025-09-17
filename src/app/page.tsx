@@ -20,8 +20,8 @@ export default function HomePage() {
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               QR워크는 QR 코드를 활용한 출퇴근 관리 시스템입니다. 
-              회사별로 독립적인 환경을 제공하며, 3개월 무료 체험으로 쉽게 시작할 수 있습니다.<br/>
-              <span className="text-green-600 font-semibold">5인 미만은 평생무료!</span><br/>
+              회사별로 독립적인 환경을 제공하며, 모든 기능을 완전 무료로 이용할 수 있습니다.<br/>
+              <span className="text-green-600 font-semibold">🎉 모든 기능 완전 무료!</span><br/>
               <span className="text-blue-600 font-semibold">🔒 회사 150미터 내에서만 출퇴근 가능</span>
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -29,7 +29,7 @@ export default function HomePage() {
                 href="/auth/register"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-medium inline-flex items-center justify-center"
               >
-                무료 체험 시작하기
+                무료로 시작하기
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
               <Link
@@ -281,7 +281,7 @@ export default function HomePage() {
                         <FileText className="h-6 w-6 text-indigo-600" />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-900">전자근로계약서 <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">유료기능</span></h4>
+                        <h4 className="font-semibold text-gray-900">전자근로계약서</h4>
                         <p className="text-gray-600">표준 근로계약서 작성, 직원 전송, 디지털 서명 및 승인 관리</p>
                       </div>
                     </div>
@@ -292,7 +292,7 @@ export default function HomePage() {
                   <h4 className="font-semibold text-blue-900 mb-2">💡 사용 팁</h4>
                   <ul className="text-blue-800 text-sm space-y-1">
                     <li>• QR 코드는 관리자가 생성하여 직원들에게 배포</li>
-                    <li>• 5인 미만 회사는 평생무료로 이용 가능</li>
+                    <li>• 모든 기능을 완전 무료로 이용 가능</li>
                     <li>• 커스텀 필드로 부서, 직급 등 추가 정보 관리</li>
                     <li>• 연차 관리 기능으로 휴가 신청 및 승인 처리</li>
                     <li>• 전자근로계약서로 디지털 채용 프로세스 완성</li>
@@ -324,7 +324,7 @@ export default function HomePage() {
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">회사 등록</h3>
                 <p className="text-gray-600">
                   회사 정보를 입력하고 관리자 계정을 생성합니다.<br/>
-                  <span className="text-green-600 font-semibold">5인 미만은 평생무료!</span>
+                  <span className="text-green-600 font-semibold">모든 기능 완전 무료!</span>
                 </p>
               </div>
               
@@ -508,9 +508,9 @@ export default function HomePage() {
               <p className="text-xl text-gray-600 mb-4">
                 디지털 채용 프로세스의 완성
               </p>
-              <div className="inline-flex items-center bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-medium">
-                <span className="mr-2">💎</span>
-                유료 기능 - 5인 이상 회사 전용
+              <div className="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
+                <span className="mr-2">🎉</span>
+                모든 기능 무료 제공
               </div>
             </div>
             
@@ -652,14 +652,14 @@ export default function HomePage() {
               지금 시작해보세요
             </h2>
             <p className="text-xl text-blue-100 mb-8">
-              3개월 무료 체험으로 QR워크의 모든 기능을 경험해보세요<br/>
-              <span className="text-green-600 font-semibold">5인 미만은 평생무료!</span>
+              QR워크의 모든 기능을 완전 무료로 이용해보세요<br/>
+              <span className="text-green-600 font-semibold">🎉 모든 기능 완전 무료!</span>
             </p>
             <Link
               href="/auth/register"
               className="bg-white hover:bg-gray-100 text-blue-600 px-8 py-3 rounded-lg text-lg font-medium inline-flex items-center justify-center"
             >
-              무료 체험 시작하기
+              무료로 시작하기
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </div>
